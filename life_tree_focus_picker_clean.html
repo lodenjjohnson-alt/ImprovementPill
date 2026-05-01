@@ -1,0 +1,1896 @@
+ 
+  
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+<title>Life Skill Tree</title>  
+<style>  
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');  
+  
+  :root {  
+    --bg: #050508;  
+    --panel: #0a0a12;  
+    --finance: #a855f7;  
+    --finance-dim: #3b1a5e;  
+    --speech: #3b82f6;  
+    --speech-dim: #1a2a5e;  
+    --purpose: #eab308;  
+    --purpose-dim: #4a3a00;  
+    --hockey: #ef4444;  
+    --hockey-dim: #5e1a1a;  
+    --knowledge: #22c55e;  
+    --knowledge-dim: #0f3a1f;  
+    --health: #f97316;  
+    --health-dim: #4a2200;  
+  }  
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }  
+  
+  body {  
+    background: var(--bg);  
+    color: #fff;  
+    font-family: 'Rajdhani', sans-serif;  
+    min-height: 100vh;  
+    overflow-x: hidden;  
+  }  
+  
+  /* Starfield */  
+  body::before {  
+    content: '';  
+    position: fixed;  
+    inset: 0;  
+    background-image:  
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),  
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),  
+      radial-gradient(1px 1px at 55% 25%, rgba(255,255,255,0.5) 0%, transparent 100%),  
+      radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.2) 0%, transparent 100%),  
+      radial-gradient(1px 1px at 85% 40%, rgba(255,255,255,0.4) 0%, transparent 100%),  
+      radial-gradient(1px 1px at 20% 85%, rgba(255,255,255,0.3) 0%, transparent 100%),  
+      radial-gradient(1px 1px at 92% 70%, rgba(255,255,255,0.5) 0%, transparent 100%),  
+      radial-gradient(1px 1px at 45% 95%, rgba(255,255,255,0.2) 0%, transparent 100%),  
+      radial-gradient(1px 1px at 65% 10%, rgba(255,255,255,0.4) 0%, transparent 100%),  
+      radial-gradient(1px 1px at 5% 50%, rgba(255,255,255,0.3) 0%, transparent 100%);  
+    pointer-events: none;  
+    z-index: 0;  
+  }  
+  
+  /* ── OVERVIEW SCREEN ── */  
+  #overview {  
+    position: relative;  
+    z-index: 1;  
+    min-height: 100vh;  
+    padding: 0 16px 40px;  
+  }  
+  
+  .top-bar {  
+    display: flex;  
+    align-items: center;  
+    justify-content: space-between;  
+    padding: 20px 0 10px;  
+  }  
+  
+  .game-title {  
+    font-family: 'Orbitron', monospace;  
+    font-size: 18px;  
+    font-weight: 900;  
+    letter-spacing: 3px;  
+    background: linear-gradient(90deg, #a855f7, #3b82f6, #22c55e, #eab308, #f97316, #ef4444);  
+    -webkit-background-clip: text;  
+    -webkit-text-fill-color: transparent;  
+    background-clip: text;  
+    text-shadow: none;  
+    filter: drop-shadow(0 0 8px rgba(168,85,247,0.5));  
+  }  
+  
+  .total-xp {  
+    font-family: 'Orbitron', monospace;  
+    font-size: 11px;  
+    color: rgba(255,255,255,0.5);  
+    letter-spacing: 1px;  
+  }  
+  
+  .total-xp span {  
+    color: #fff;  
+    font-weight: 700;  
+  }  
+  
+  .overview-subtitle {  
+    text-align: center;  
+    color: rgba(255,255,255,0.3);  
+    font-size: 13px;  
+    letter-spacing: 2px;  
+    text-transform: uppercase;  
+    margin-bottom: 28px;  
+    margin-top: 4px;  
+  }  
+  
+  /* Branch grid */  
+  .branches-grid {  
+    display: grid;  
+    grid-template-columns: 1fr 1fr;  
+    gap: 14px;  
+  }  
+  
+  .branch-card {  
+    background: var(--panel);  
+    border: 1px solid rgba(255,255,255,0.06);  
+    border-radius: 16px;  
+    padding: 18px 14px 16px;  
+    cursor: pointer;  
+    position: relative;  
+    overflow: hidden;  
+    transition: transform 0.18s, border-color 0.18s;  
+    -webkit-tap-highlight-color: transparent;  
+  }  
+  
+  .branch-card:active { transform: scale(0.96); }  
+  
+  .branch-card::before {  
+    content: '';  
+    position: absolute;  
+    inset: 0;  
+    border-radius: 16px;  
+    opacity: 0;  
+    transition: opacity 0.3s;  
+  }  
+  
+  .branch-card:hover::before { opacity: 1; }  
+  
+  .branch-card[data-branch="finance"] { border-color: rgba(168,85,247,0.25); }  
+  .branch-card[data-branch="finance"]::before { background: radial-gradient(ellipse at top left, rgba(168,85,247,0.08), transparent 70%); }  
+  .branch-card[data-branch="speech"] { border-color: rgba(59,130,246,0.25); }  
+  .branch-card[data-branch="speech"]::before { background: radial-gradient(ellipse at top left, rgba(59,130,246,0.08), transparent 70%); }  
+  .branch-card[data-branch="purpose"] { border-color: rgba(234,179,8,0.25); }  
+  .branch-card[data-branch="purpose"]::before { background: radial-gradient(ellipse at top left, rgba(234,179,8,0.08), transparent 70%); }  
+  .branch-card[data-branch="hockey"] { border-color: rgba(239,68,68,0.25); }  
+  .branch-card[data-branch="hockey"]::before { background: radial-gradient(ellipse at top left, rgba(239,68,68,0.08), transparent 70%); }  
+  .branch-card[data-branch="knowledge"] { border-color: rgba(34,197,94,0.25); }  
+  .branch-card[data-branch="knowledge"]::before { background: radial-gradient(ellipse at top left, rgba(34,197,94,0.08), transparent 70%); }  
+  .branch-card[data-branch="health"] { border-color: rgba(249,115,22,0.25); }  
+  .branch-card[data-branch="health"]::before { background: radial-gradient(ellipse at top left, rgba(249,115,22,0.08), transparent 70%); }  
+  
+  .branch-icon {  
+    font-size: 28px;  
+    margin-bottom: 8px;  
+    display: block;  
+    filter: drop-shadow(0 0 6px currentColor);  
+  }  
+  
+  .branch-name {  
+    font-family: 'Orbitron', monospace;  
+    font-size: 11px;  
+    font-weight: 700;  
+    letter-spacing: 2px;  
+    text-transform: uppercase;  
+    margin-bottom: 10px;  
+  }  
+  
+  .branch-card[data-branch="finance"] .branch-name { color: var(--finance); text-shadow: 0 0 10px var(--finance); }  
+  .branch-card[data-branch="speech"] .branch-name { color: var(--speech); text-shadow: 0 0 10px var(--speech); }  
+  .branch-card[data-branch="purpose"] .branch-name { color: var(--purpose); text-shadow: 0 0 10px var(--purpose); }  
+  .branch-card[data-branch="hockey"] .branch-name { color: var(--hockey); text-shadow: 0 0 10px var(--hockey); }  
+  .branch-card[data-branch="knowledge"] .branch-name { color: var(--knowledge); text-shadow: 0 0 10px var(--knowledge); }  
+  .branch-card[data-branch="health"] .branch-name { color: var(--health); text-shadow: 0 0 10px var(--health); }  
+  
+  .branch-progress-bar {  
+    height: 4px;  
+    background: rgba(255,255,255,0.06);  
+    border-radius: 2px;  
+    overflow: hidden;  
+    margin-bottom: 6px;  
+  }  
+  
+  .branch-progress-fill {  
+    height: 100%;  
+    border-radius: 2px;  
+    transition: width 0.6s ease;  
+  }  
+  
+  .branch-card[data-branch="finance"] .branch-progress-fill { background: var(--finance); box-shadow: 0 0 8px var(--finance); }  
+  .branch-card[data-branch="speech"] .branch-progress-fill { background: var(--speech); box-shadow: 0 0 8px var(--speech); }  
+  .branch-card[data-branch="purpose"] .branch-progress-fill { background: var(--purpose); box-shadow: 0 0 8px var(--purpose); }  
+  .branch-card[data-branch="hockey"] .branch-progress-fill { background: var(--hockey); box-shadow: 0 0 8px var(--hockey); }  
+  .branch-card[data-branch="knowledge"] .branch-progress-fill { background: var(--knowledge); box-shadow: 0 0 8px var(--knowledge); }  
+  .branch-card[data-branch="health"] .branch-progress-fill { background: var(--health); box-shadow: 0 0 8px var(--health); }  
+  
+  .branch-stats {  
+    font-size: 11px;  
+    color: rgba(255,255,255,0.4);  
+    letter-spacing: 1px;  
+  }  
+  
+  .branch-stats strong {  
+    color: rgba(255,255,255,0.8);  
+  }  
+  
+  /* ── BRANCH DETAIL SCREEN ── */  
+  #branch-view {  
+    display: none;  
+    position: fixed;  
+    inset: 0;  
+    z-index: 100;  
+    background: var(--bg);  
+    overflow-y: auto;  
+    -webkit-overflow-scrolling: touch;  
+  }  
+  
+  #branch-view.active { display: block; }  
+
+  #branch-view.swiping-back {
+    transition: none;
+  }
+
+  #branch-view.returning-home {
+    transition: transform 0.22s ease, opacity 0.22s ease;
+  }
+  
+  .branch-header {  
+    position: sticky;  
+    top: 0;  
+    z-index: 10;  
+    background: rgba(5,5,8,0.95);  
+    backdrop-filter: blur(20px);  
+    -webkit-backdrop-filter: blur(20px);  
+    padding: 16px 20px 14px;  
+    border-bottom: 1px solid rgba(255,255,255,0.05);  
+    display: flex;  
+    align-items: center;  
+    gap: 14px;  
+  }  
+  
+  .back-btn {  
+    background: rgba(255,255,255,0.06);  
+    border: none;  
+    border-radius: 10px;  
+    color: rgba(255,255,255,0.6);  
+    font-size: 18px;  
+    width: 38px;  
+    height: 38px;  
+    display: flex;  
+    align-items: center;  
+    justify-content: center;  
+    cursor: pointer;  
+    flex-shrink: 0;  
+    font-family: 'Rajdhani', sans-serif;  
+  }  
+  
+  .branch-header-info { flex: 1; }  
+  
+  .branch-header-name {  
+    font-family: 'Orbitron', monospace;  
+    font-size: 16px;  
+    font-weight: 900;  
+    letter-spacing: 2px;  
+  }  
+  
+  .branch-header-xp {  
+    font-size: 12px;  
+    color: rgba(255,255,255,0.4);  
+    margin-top: 2px;  
+    letter-spacing: 1px;  
+  }  
+  
+  /* Tree layout */  
+  .tree-container {  
+    padding: 24px 16px 60px;  
+    position: relative;  
+  }  
+  
+  .tier-section {  
+    margin-bottom: 8px;  
+  }  
+  
+  .tier-label {  
+    font-family: 'Orbitron', monospace;  
+    font-size: 9px;  
+    letter-spacing: 4px;  
+    color: rgba(255,255,255,0.2);  
+    text-transform: uppercase;  
+    margin-bottom: 12px;  
+    padding-left: 4px;  
+    display: flex;  
+    align-items: center;  
+    gap: 8px;  
+  }  
+  
+  .tier-label::after {  
+    content: '';  
+    flex: 1;  
+    height: 1px;  
+    background: rgba(255,255,255,0.05);  
+  }  
+  
+  .skills-row {  
+    display: flex;  
+    gap: 10px;  
+    flex-wrap: wrap;  
+    margin-bottom: 6px;  
+  }  
+  
+  /* Connector lines */  
+  .connector {  
+    display: flex;  
+    justify-content: center;  
+    margin-bottom: 6px;  
+    gap: 40px;  
+  }  
+  
+  .connector-line {  
+    width: 2px;  
+    height: 28px;  
+    background: rgba(255,255,255,0.08);  
+    border-radius: 1px;  
+    position: relative;  
+    transition: background 0.4s;  
+  }  
+  
+  .connector-line.lit {  
+    background: currentColor;  
+    box-shadow: 0 0 8px currentColor;  
+  }  
+  
+  /* Skill node */  
+  .skill-node {  
+    background: rgba(10,10,18,0.9);  
+    border: 1.5px solid rgba(255,255,255,0.08);  
+    border-radius: 14px;  
+    padding: 12px 12px 10px;  
+    cursor: pointer;  
+    position: relative;  
+    transition: all 0.22s;  
+    flex: 1;  
+    min-width: 130px;  
+    max-width: 200px;  
+    -webkit-tap-highlight-color: transparent;  
+  }  
+  
+  .skill-node:active { transform: scale(0.96); }  
+  
+  .skill-node.locked {  
+    opacity: 0.45;  
+    cursor: default;  
+  }  
+  
+  .skill-node.completed {  
+    border-color: currentColor;  
+  }  
+  
+  .skill-node.available {  
+    border-color: currentColor;  
+    opacity: 0.85;  
+    animation: pulse-border 2.5s infinite;  
+  }  
+  
+  @keyframes pulse-border {  
+    0%, 100% { box-shadow: 0 0 6px currentColor, inset 0 0 6px rgba(255,255,255,0.03); }  
+    50% { box-shadow: 0 0 18px currentColor, inset 0 0 10px rgba(255,255,255,0.05); }  
+  }  
+  
+  .skill-name {  
+    font-family: 'Orbitron', monospace;  
+    font-size: 9.5px;  
+    font-weight: 700;  
+    letter-spacing: 1px;  
+    margin-bottom: 5px;  
+    line-height: 1.3;  
+  }  
+  
+  .skill-path {  
+    display: inline-block;  
+    font-family: 'Orbitron', monospace;  
+    font-size: 7px;  
+    letter-spacing: 1.5px;  
+    text-transform: uppercase;  
+    color: rgba(255,255,255,0.5);  
+    background: rgba(255,255,255,0.05);  
+    border: 1px solid rgba(255,255,255,0.08);  
+    border-radius: 999px;  
+    padding: 2px 6px;  
+    margin-bottom: 6px;  
+  }  
+
+  .skill-mission {  
+    font-size: 11px;  
+    color: rgba(255,255,255,0.45);  
+    line-height: 1.4;  
+    margin-bottom: 8px;  
+  }  
+  
+  .skill-tier-dots {  
+    display: flex;  
+    gap: 4px;  
+    align-items: center;  
+  }  
+  
+  .tier-dot {  
+    width: 7px;  
+    height: 7px;  
+    border-radius: 50%;  
+    background: rgba(255,255,255,0.1);  
+    border: 1px solid rgba(255,255,255,0.15);  
+    transition: all 0.4s;  
+  }  
+  
+  .tier-dot.filled {  
+    background: currentColor;  
+    box-shadow: 0 0 6px currentColor, 0 0 12px currentColor;  
+    border-color: currentColor;  
+  }  
+  
+  .tier-dot.filled.tier-2 {  
+    box-shadow: 0 0 8px currentColor, 0 0 16px currentColor, 0 0 24px currentColor;  
+  }  
+  
+  .tier-dot.filled.tier-3 {  
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 35px currentColor;  
+    width: 9px;  
+    height: 9px;  
+  }  
+  
+  .skill-status-badge {  
+    position: absolute;  
+    top: 8px;  
+    right: 8px;  
+    font-size: 13px;  
+  }  
+  
+  /* ── MISSION MODAL ── */  
+  #mission-modal {  
+    display: none;  
+    position: fixed;  
+    inset: 0;  
+    z-index: 200;  
+    background: rgba(0,0,0,0.85);  
+    backdrop-filter: blur(12px);  
+    -webkit-backdrop-filter: blur(12px);  
+    align-items: flex-end;  
+    justify-content: center;  
+    padding: 0;  
+  }  
+  
+  #mission-modal.active {  
+    display: flex;  
+    animation: modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);  
+  }  
+  
+  @keyframes modal-in {  
+    from { opacity: 0; transform: translateY(40px); }  
+    to { opacity: 1; transform: translateY(0); }  
+  }  
+  
+  .modal-sheet {  
+    background: #0d0d18;  
+    border: 1px solid rgba(255,255,255,0.08);  
+    border-radius: 28px 28px 0 0;  
+    padding: 10px 24px 44px;  
+    width: 100%;  
+    max-width: 600px;  
+    position: relative;  
+    touch-action: pan-y;
+    transition: transform 0.22s ease, opacity 0.22s ease;
+    will-change: transform;
+  }  
+
+  .modal-sheet.dragging {
+    transition: none;
+  }
+  
+  .modal-drag-handle {  
+    width: 40px;  
+    height: 4px;  
+    background: rgba(255,255,255,0.15);  
+    border-radius: 2px;  
+    margin: 10px auto 20px;  
+  }  
+  
+  .modal-skill-name {  
+    font-family: 'Orbitron', monospace;  
+    font-size: 15px;  
+    font-weight: 900;  
+    letter-spacing: 2px;  
+    margin-bottom: 4px;  
+  }  
+  
+  .modal-tier-label {  
+    font-size: 11px;  
+    color: rgba(255,255,255,0.35);  
+    letter-spacing: 2px;  
+    text-transform: uppercase;  
+    margin-bottom: 16px;  
+  }  
+  
+  .modal-mission-header {  
+    font-family: 'Orbitron', monospace;  
+    font-size: 9px;  
+    letter-spacing: 3px;  
+    color: rgba(255,255,255,0.25);  
+    text-transform: uppercase;  
+    margin-bottom: 8px;  
+  }  
+  
+  .modal-mission-text {  
+    font-size: 15px;  
+    line-height: 1.6;  
+    color: rgba(255,255,255,0.8);  
+    margin-bottom: 24px;  
+    padding: 14px;  
+    background: rgba(255,255,255,0.03);  
+    border-radius: 12px;  
+    border: 1px solid rgba(255,255,255,0.06);  
+  }  
+  
+  .modal-tier-progress {  
+    display: flex;  
+    gap: 8px;  
+    margin-bottom: 24px;  
+    align-items: center;  
+  }  
+  
+  .modal-tier-dot {  
+    width: 12px;  
+    height: 12px;  
+    border-radius: 50%;  
+    background: rgba(255,255,255,0.1);  
+    border: 1.5px solid rgba(255,255,255,0.2);  
+    transition: all 0.4s;  
+  }  
+  
+  .modal-tier-dot.filled {  
+    background: currentColor;  
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;  
+    border-color: currentColor;  
+  }  
+  
+  .modal-tier-text {  
+    font-size: 12px;  
+    color: rgba(255,255,255,0.35);  
+    letter-spacing: 1px;  
+    margin-left: 4px;  
+  }  
+  
+  .modal-complete-btn {  
+    width: 100%;  
+    padding: 16px;  
+    border: none;  
+    border-radius: 16px;  
+    font-family: 'Orbitron', monospace;  
+    font-size: 12px;  
+    font-weight: 700;  
+    letter-spacing: 3px;  
+    text-transform: uppercase;  
+    cursor: pointer;  
+    transition: all 0.2s;  
+    margin-bottom: 10px;  
+  }  
+  
+  .modal-complete-btn:active { transform: scale(0.97); }  
+  
+  .modal-close-btn {  
+    width: 100%;  
+    padding: 12px;  
+    border: none;  
+    background: transparent;  
+    color: rgba(255,255,255,0.3);  
+    font-family: 'Rajdhani', sans-serif;  
+    font-size: 14px;  
+    cursor: pointer;  
+    letter-spacing: 1px;  
+  }  
+  
+  /* ── UNLOCK FLASH ── */  
+  #unlock-flash {  
+    display: none;  
+    position: fixed;  
+    inset: 0;  
+    z-index: 300;  
+    pointer-events: none;  
+    align-items: center;  
+    justify-content: center;  
+    flex-direction: column;  
+    gap: 12px;  
+  }  
+  
+  #unlock-flash.active {  
+    display: flex;  
+    animation: flash-anim 1.6s forwards;  
+  }  
+  
+  @keyframes flash-anim {  
+    0% { opacity: 0; }  
+    15% { opacity: 1; }  
+    70% { opacity: 1; }  
+    100% { opacity: 0; }  
+  }  
+  
+  .flash-ring {  
+    width: 120px;  
+    height: 120px;  
+    border-radius: 50%;  
+    border: 3px solid currentColor;  
+    box-shadow: 0 0 30px currentColor, 0 0 60px currentColor, inset 0 0 30px rgba(255,255,255,0.1);  
+    display: flex;  
+    align-items: center;  
+    justify-content: center;  
+    font-size: 40px;  
+    animation: ring-pulse 0.4s ease-out;  
+  }  
+  
+  @keyframes ring-pulse {  
+    0% { transform: scale(0.5); }  
+    100% { transform: scale(1); }  
+  }  
+  
+  .flash-text {  
+    font-family: 'Orbitron', monospace;  
+    font-size: 14px;  
+    font-weight: 900;  
+    letter-spacing: 4px;  
+    color: #fff;  
+    text-shadow: 0 0 20px currentColor;  
+    text-align: center;  
+  }  
+  
+  .flash-subtext {  
+    font-size: 12px;  
+    color: rgba(255,255,255,0.5);  
+    letter-spacing: 2px;  
+    text-align: center;  
+  }  
+
+
+  /* ── DANGER RESET CONTROL ── */
+  .danger-zone {
+    margin: 34px 0 8px;
+    padding: 18px 0 4px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .reset-btn {
+    background: linear-gradient(135deg, rgba(239,68,68,0.95), rgba(127,29,29,0.95));
+    border: 1px solid rgba(248,113,113,0.75);
+    border-radius: 14px;
+    color: #0b0303;
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    padding: 13px 22px;
+    text-transform: uppercase;
+    box-shadow: 0 0 14px rgba(239,68,68,0.45), inset 0 0 10px rgba(255,255,255,0.14);
+    cursor: pointer;
+  }
+
+  .reset-btn:active { transform: scale(0.96); }
+
+  #reset-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 260;
+    background: rgba(0,0,0,0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  #reset-modal.active {
+    display: flex;
+    animation: modal-in 0.25s ease-out;
+  }
+
+  .reset-confirm-card {
+    width: 100%;
+    max-width: 420px;
+    background: linear-gradient(180deg, #11070a, #0d0d18 72%);
+    border: 1px solid rgba(239,68,68,0.42);
+    border-radius: 24px;
+    padding: 24px 20px 20px;
+    box-shadow: 0 0 28px rgba(239,68,68,0.24), inset 0 0 22px rgba(239,68,68,0.05);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .reset-confirm-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: radial-gradient(circle at top, rgba(239,68,68,0.18), transparent 58%);
+    pointer-events: none;
+  }
+
+  .reset-alert-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: 2px solid #ef4444;
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 26px;
+    font-weight: 900;
+    margin: 0 auto 16px;
+    box-shadow: 0 0 18px rgba(239,68,68,0.6), inset 0 0 18px rgba(239,68,68,0.08);
+  }
+
+  .reset-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-align: center;
+    color: #ef4444;
+    text-shadow: 0 0 12px rgba(239,68,68,0.65);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .reset-warning-text {
+    color: rgba(255,255,255,0.78);
+    font-size: 15px;
+    line-height: 1.45;
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .reset-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    position: relative;
+  }
+
+  .reset-action-btn {
+    border: none;
+    border-radius: 14px;
+    padding: 14px 10px;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .reset-no-btn {
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.72);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .reset-yes-btn {
+    background: linear-gradient(135deg, #ef4444, #7f1d1d);
+    color: #090202;
+    box-shadow: 0 0 16px rgba(239,68,68,0.45);
+  }
+
+  .reset-action-btn:active { transform: scale(0.96); }
+
+
+  /* ── OPERATING SYSTEM UPGRADES ── */
+  .today-dashboard { background: linear-gradient(180deg, rgba(10,10,18,0.96), rgba(8,8,14,0.92)); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 16px; margin: 0 0 18px; box-shadow: 0 0 24px rgba(168,85,247,0.08), inset 0 0 18px rgba(255,255,255,0.02); }
+  .dashboard-topline { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+  .dashboard-title { font-family:'Orbitron', monospace; font-size:12px; letter-spacing:3px; color:rgba(255,255,255,0.78); text-transform:uppercase; }
+  .level-pill { font-family:'Orbitron', monospace; font-size:10px; letter-spacing:1.4px; color:#d9ccff; border:1px solid rgba(168,85,247,0.32); background:rgba(168,85,247,0.08); border-radius:999px; padding:7px 10px; white-space:nowrap; }
+  .dashboard-grid { display:grid; grid-template-columns:1fr; gap:10px; }
+  .dash-card { border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.03); border-radius:14px; padding:12px; }
+  .dash-label { font-family:'Orbitron', monospace; font-size:8px; letter-spacing:2px; color:rgba(255,255,255,0.32); text-transform:uppercase; margin-bottom:7px; }
+  .dash-value { font-size:14px; color:rgba(255,255,255,0.84); line-height:1.35; }
+  .focus-row { display:flex; gap:8px; align-items:center; }
+  .focus-select { flex:1; min-width:0; background:#090911; color:#fff; border:1px solid rgba(255,255,255,0.10); border-radius:11px; padding:10px; font-family:'Rajdhani', sans-serif; font-size:14px; }
+  .mini-btn { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.72); border:1px solid rgba(255,255,255,0.10); border-radius:11px; padding:10px 11px; font-family:'Orbitron', monospace; font-size:8px; letter-spacing:1.4px; cursor:pointer; }
+  .quest-list { display:flex; flex-direction:column; gap:8px; }
+  .quest-item { display:grid; grid-template-columns:auto 1fr auto; gap:9px; align-items:start; border:1px solid rgba(255,255,255,0.06); background:rgba(0,0,0,0.18); border-radius:12px; padding:10px; cursor:pointer; }
+  .quest-branch-dot { width:9px; height:9px; border-radius:50%; margin-top:5px; background:var(--qcolor); box-shadow:0 0 8px var(--qcolor); }
+  .quest-title { font-family:'Orbitron', monospace; font-size:9px; letter-spacing:1.2px; color:#fff; text-transform:uppercase; margin-bottom:3px; }
+  .quest-text { color:rgba(255,255,255,0.58); font-size:12px; line-height:1.3; }
+  .difficulty-tag, .near-badge { display:inline-block; font-family:'Orbitron', monospace; font-size:7px; letter-spacing:1px; border-radius:999px; padding:4px 6px; text-transform:uppercase; white-space:nowrap; }
+  .difficulty-tag { color:rgba(255,255,255,0.74); border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05); }
+  .near-badge { margin:6px 0; color:#fef3c7; border:1px solid rgba(234,179,8,0.30); background:rgba(234,179,8,0.09); }
+  .dashboard-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+  .dashboard-action-btn { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.74); border:1px solid rgba(255,255,255,0.10); border-radius:13px; padding:11px 8px; font-family:'Orbitron', monospace; font-size:8px; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; }
+  .review-input { width:100%; background:rgba(255,255,255,0.04); color:#fff; border:1px solid rgba(255,255,255,0.10); border-radius:12px; padding:12px; font-family:'Rajdhani', sans-serif; font-size:14px; min-height:76px; resize:vertical; margin:0 0 14px; outline:none; }
+  .journal-card { border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.035); border-radius:13px; padding:12px; margin-bottom:9px; }
+  .journal-title { font-family:'Orbitron', monospace; font-size:9px; letter-spacing:1.3px; text-transform:uppercase; color:#fff; margin-bottom:4px; }
+  .journal-meta { font-size:11px; color:rgba(255,255,255,0.42); margin-bottom:6px; }
+  .journal-proof { font-size:13px; color:rgba(255,255,255,0.72); line-height:1.35; }
+  .modal-scroll-body { max-height:55vh; overflow-y:auto; padding-right:2px; }
+  #journal-modal, #weekly-review-modal { display:none; position:fixed; inset:0; z-index:255; background:rgba(0,0,0,0.88); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); align-items:center; justify-content:center; padding:24px; }
+  #journal-modal.active, #weekly-review-modal.active { display:flex; animation:modal-in 0.25s ease-out; }
+  @media (min-width:720px) { .dashboard-grid { grid-template-columns:1fr 1fr; } }
+
+</style>  
+</head>  
+<body>  
+  
+<!-- ── OVERVIEW SCREEN ── -->  
+<div id="overview">  
+  <div class="top-bar">  
+    <div class="game-title">LIFE TREE</div>  
+    <div class="total-xp">TOTAL XP <span id="total-xp-display">0</span></div>  
+  </div>  
+  <div class="overview-subtitle">SELECT A BRANCH</div>  
+
+  <section class="today-dashboard" id="today-dashboard">
+    <div class="dashboard-topline"><div class="dashboard-title">Today Dashboard</div><div class="level-pill" id="level-pill">LEVEL 1</div></div>
+    <div class="dashboard-grid">
+      <div class="dash-card" style="grid-column:1/-1;"><div class="dash-label">Current Focus</div><div class="focus-row"><select class="focus-select" id="focus-select"></select><button class="mini-btn" onclick="pickFocusQuest()">PICK QUEST</button></div><div class="quest-list" id="focus-quest"></div></div>
+      <div class="dash-card"><div class="dash-label">Streaks & Weekly Priority</div><div class="dash-value" id="streak-summary">No active streak yet.</div></div>
+    </div>
+    <div class="dashboard-actions"><button class="dashboard-action-btn" onclick="openJournalModal()">Mission Journal</button><button class="dashboard-action-btn" onclick="openWeeklyReviewModal()">Weekly Review</button></div>
+  </section>
+
+  
+  <div class="branches-grid" id="branches-grid"></div>
+
+  <div class="danger-zone">
+    <button class="reset-btn" onclick="openResetModal()">RESET</button>
+  </div>
+</div>  
+  
+<!-- ── BRANCH DETAIL SCREEN ── -->  
+<div id="branch-view">  
+  <div class="branch-header">  
+    <button class="back-btn" onclick="closeBranch()">←</button>  
+    <div class="branch-header-info">  
+      <div class="branch-header-name" id="bv-name"></div>  
+      <div class="branch-header-xp" id="bv-xp"></div>  
+    </div>  
+  </div>  
+  <div class="tree-container" id="tree-container"></div>  
+</div>  
+  
+<!-- ── MISSION MODAL ── -->  
+<div id="mission-modal" onclick="closeMissionModal(event)">  
+  <div class="modal-sheet" id="modal-sheet">  
+    <div class="modal-drag-handle"></div>  
+    <div class="modal-skill-name" id="modal-skill-name"></div>  
+    <div class="modal-tier-label" id="modal-tier-label"></div>  
+    <div class="modal-mission-header">MISSION</div>  
+    <div class="modal-mission-text" id="modal-mission-text"></div>  
+    <div class="modal-tier-progress" id="modal-tier-progress"></div>  
+    <button class="modal-complete-btn" id="modal-complete-btn" onclick="completeMission()">  
+      ✓ MISSION COMPLETE  
+    </button>  
+    <button class="modal-close-btn" onclick="closeMissionModal()">CLOSE</button>  
+  </div>  
+</div>  
+  
+<!-- ── RESET CONFIRMATION MODAL ── -->
+<div id="reset-modal" onclick="closeResetModal(event)">
+  <div class="reset-confirm-card">
+    <div class="reset-alert-icon">!</div>
+    <div class="reset-title">Are you sure?</div>
+    <div class="reset-warning-text">This is cannot be undone</div>
+    <div class="reset-actions">
+      <button class="reset-action-btn reset-no-btn" onclick="closeResetModal()">NO</button>
+      <button class="reset-action-btn reset-yes-btn" onclick="confirmFullReset()">YES</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── JOURNAL MODAL ── -->
+<div id="journal-modal" onclick="closeJournalModal(event)"><div class="reset-confirm-card" style="max-width:640px; border-color:rgba(59,130,246,0.35); box-shadow:0 0 28px rgba(59,130,246,0.18);"><div class="reset-title" style="font-size:18px; color:#93c5fd;">Mission Journal</div><div class="reset-warning-text" style="color:rgba(255,255,255,0.48);">Completed missions, XP, and dates.</div><div class="modal-scroll-body" id="journal-list"></div><div class="reset-actions" style="grid-template-columns:1fr;"><button class="reset-action-btn reset-no-btn" onclick="closeJournalModal()">CLOSE</button></div></div></div>
+<!-- ── WEEKLY REVIEW MODAL ── -->
+<div id="weekly-review-modal" onclick="closeWeeklyReviewModal(event)"><div class="reset-confirm-card" style="max-width:640px; border-color:rgba(234,179,8,0.35); box-shadow:0 0 28px rgba(234,179,8,0.16);"><div class="reset-title" style="font-size:18px; color:#fde68a;">Weekly Review</div><div class="reset-warning-text" id="weekly-review-summary" style="color:rgba(255,255,255,0.54);"></div><textarea class="review-input" id="review-wins" placeholder="What did I complete this week?"></textarea><textarea class="review-input" id="review-avoid" placeholder="What did I avoid or procrastinate on?"></textarea><textarea class="review-input" id="review-priority" placeholder="What is the next priority for the coming week?"></textarea><div class="reset-actions"><button class="reset-action-btn reset-no-btn" onclick="closeWeeklyReviewModal()">CANCEL</button><button class="reset-action-btn reset-yes-btn" style="background:linear-gradient(135deg,#eab308,#854d0e);" onclick="saveWeeklyReview()">SAVE</button></div></div></div>
+<!-- ── UNLOCK FLASH ── -->  
+<div id="unlock-flash">  
+  <div class="flash-ring" id="flash-ring">⚡</div>  
+  <div class="flash-text" id="flash-text">SKILL UNLOCKED</div>  
+  <div class="flash-subtext" id="flash-subtext"></div>  
+</div>  
+  
+<script>  
+// ═══════════════════════════════════════════  
+// DATA  
+// ═══════════════════════════════════════════  
+const BRANCHES = {  
+  finance: {
+    name: 'Finance',
+    icon: '💜',
+    emoji: '💰',
+    color: '#a855f7',
+    dim: '#3b1a5e',
+    skills: [
+      // Tier 1 – Foundation paths
+      { id: 'f_income1', tier: 1, path: 'Income', name: 'First Dollar', missions: [
+        'Earn $50 through your own effort. No allowance or gifts count.',
+        'Earn $300 total in one month through work, selling, or a side hustle.',
+        'Build a repeatable way to make $100 per week and prove it for 3 straight weeks.'
+      ] },
+      { id: 'f_income2', tier: 1, path: 'Income', name: 'Value Creation', missions: [
+        'Sell 5 items, services, or digital products.',
+        'Reach $200 total profit from selling.',
+        'Create one offer that can sell repeatedly without being redesigned every time.'
+      ] },
+      { id: 'f_saving1', tier: 1, path: 'Saving', name: 'Savings Seed', missions: [
+        'Save $50 in a dedicated savings account.',
+        'Save $500 in that account.',
+        'Save $1,500 and do not touch it for 30 days.'
+      ] },
+      { id: 'f_saving2', tier: 1, path: 'Saving', name: 'Spending Awareness', missions: [
+        'Track every dollar you spend for 7 days.',
+        'Track every dollar you spend for 30 days.',
+        'Identify and eliminate 3 unnecessary expenses.'
+      ] },
+      { id: 'f_budget1', tier: 1, path: 'Budgeting', name: 'Budget Basics', missions: [
+        'Create a basic budget with income, saving, spending, and giving categories.',
+        'Follow the budget for 2 weeks.',
+        'Follow the budget for 2 months with less than 10% deviation.'
+      ] },
+      { id: 'f_budget2', tier: 1, path: 'Budgeting', name: 'Cash Flow Control', missions: [
+        'End one week with money left over.',
+        'End one month with at least 20% of income saved.',
+        'Maintain a 30%+ savings rate for 2 months.'
+      ] },
+      { id: 'f_know1', tier: 1, path: 'Financial Intelligence', name: 'Money Knowledge', missions: [
+        'Learn 10 core finance terms: interest, inflation, asset, liability, equity, index fund, ETF, credit, debt, and net worth.',
+        'Explain all 10 terms out loud without notes.',
+        'Teach the 10 terms to someone else and have them explain 5 back to you.'
+      ] },
+      { id: 'f_know2', tier: 1, path: 'Financial Intelligence', name: 'Banking System', missions: [
+        'Open or review a checking account and savings account.',
+        'Understand fees, interest, transfers, overdrafts, and minimum balances for your accounts.',
+        'Optimize your banking setup: no unnecessary fees, clear purpose for each account, and automatic transfers if possible.'
+      ] },
+
+      // Tier 2 – Development
+      { id: 'f_dev1', tier: 2, path: 'Saving', name: 'Emergency Fund', requires: ['f_saving1','f_budget1'], missions: [
+        'Save a $500 starter emergency fund.',
+        'Save 1 month of necessary expenses.',
+        'Maintain the emergency fund untouched for 60 days.'
+      ] },
+      { id: 'f_dev2', tier: 2, path: 'Income', name: 'Income Expansion', requires: ['f_income1','f_income2'], missions: [
+        'Make $500 in one month from work, selling, or a side hustle.',
+        'Make $1,000 in one month.',
+        'Maintain $1,000/month income for 3 straight months.'
+      ] },
+      { id: 'f_dev3', tier: 2, path: 'Budgeting', name: 'Expense Discipline', requires: ['f_saving2','f_budget2'], missions: [
+        'Cut 1 recurring or repeated unnecessary expense.',
+        'Reduce nonessential spending by 20% for one month.',
+        'Sustain the spending reduction for 2 months.'
+      ] },
+      { id: 'f_dev4', tier: 2, path: 'Financial Intelligence', name: 'Credit Basics', requires: ['f_know1','f_know2'], missions: [
+        'Check your credit score or learn how credit scores are calculated if you do not have one yet.',
+        'Understand payment history, utilization, credit age, credit mix, and hard inquiries.',
+        'Build and maintain good credit habits for 3 months: no missed payments, low utilization, and no careless applications.'
+      ] },
+
+      // Tier 3 – Advanced / investing unlocks
+      { id: 'f_inv1', tier: 3, path: 'Investing', name: 'Market Entry', requires: [{ id: 'f_saving1', tier: 3 }, { id: 'f_budget1', tier: 2 }, { id: 'f_know1', tier: 2 }], missions: [
+        'Open a brokerage account or investment account with a parent/guardian if required.',
+        'Invest your first $100 in a diversified investment such as an index fund or ETF.',
+        'Hold the investment for 60 days without panic selling or random trading.'
+      ] },
+      { id: 'f_inv2', tier: 3, path: 'Investing', name: 'Consistent Investing', requires: ['f_inv1'], missions: [
+        'Invest monthly for 2 straight months.',
+        'Invest monthly for 6 straight months.',
+        'Automate investing so it happens without relying on motivation.'
+      ] },
+      { id: 'f_inv3', tier: 3, path: 'Investing', name: 'Understanding Risk', requires: ['f_inv1','f_know1'], missions: [
+        'Research 3 investments and write what each one actually owns.',
+        'Compare risk, expected return, fees, and time horizon for each investment.',
+        'Build a simple portfolio plan with percentages and explain why each piece belongs.'
+      ] },
+      { id: 'f_adv1', tier: 3, path: 'Wealth Momentum', name: 'Passive Income', requires: ['f_inv1','f_dev2'], missions: [
+        'Earn $10 in passive income from interest, dividends, or another legal asset-based source.',
+        'Earn $50/month in passive income.',
+        'Sustain $50/month passive income for 3 months.'
+      ] },
+      { id: 'f_adv2', tier: 3, path: 'Wealth Momentum', name: 'Net Worth Tracking', requires: ['f_dev1','f_budget1'], missions: [
+        'Calculate your current net worth: assets minus liabilities.',
+        'Track net worth monthly for 3 months.',
+        'Grow net worth 3 months in a row.'
+      ] },
+      { id: 'f_adv3', tier: 3, path: 'Financial Intelligence', name: 'Tax Awareness', requires: ['f_dev2','f_know1'], missions: [
+        'Learn how income tax, payroll tax, deductions, credits, and filing status work.',
+        'File your taxes or complete a realistic practice filing with your real income numbers.',
+        'Legally optimize deductions, documentation, and tax planning for the next year.'
+      ] },
+      { id: 'f_adv4', tier: 3, path: 'Risk Protection', name: 'Insurance Basics', requires: ['f_dev4'], missions: [
+        'Understand why auto, health, renter\'s/home, disability, and liability insurance matter.',
+        'Identify which coverage types actually apply to your current life.',
+        'Review and optimize coverage annually or with a parent/guardian if they manage it.'
+      ] },
+
+      // Tier 4 – Elite
+      { id: 'f_elite1', tier: 4, path: 'Elite Finance', name: 'Financial Control', requires: ['f_dev1','f_dev2','f_dev3'], missions: [
+        'Cover all personal expenses from your own income.',
+        'Save or invest at least 30% of your income.',
+        'Sustain the 30%+ save/invest rate for 6 months.'
+      ] },
+      { id: 'f_elite2', tier: 4, path: 'Elite Finance', name: 'Income Independence', requires: ['f_adv1','f_elite1'], missions: [
+        'Passive income covers 10% of monthly expenses.',
+        'Passive income covers 25% of monthly expenses.',
+        'Passive income covers 50% of monthly expenses.'
+      ] },
+      { id: 'f_elite3', tier: 4, path: 'Elite Finance', name: 'Wealth Builder', requires: ['f_inv2','f_adv2'], missions: [
+        'Reach $5,000 invested.',
+        'Reach $10,000 invested.',
+        'Reach $25,000 invested.'
+      ] },
+      { id: 'f_elite4', tier: 4, path: 'Elite Finance', name: 'Financial Freedom', requires: ['f_elite2','f_elite3'], missions: [
+        'Have 6 months of necessary expenses saved or invested safely.',
+        'Become debt-free except for productive long-term debt such as a mortgage.',
+        'Build enough financial margin that you can choose work based on purpose, not panic.'
+      ] },
+    ]
+  },
+  speech: {  
+    name: 'Speech',  
+    icon: '💙',  
+    emoji: '🗣️',  
+    color: '#3b82f6',  
+    dim: '#1a2a5e',  
+    skills: [
+      // Tier 1 – Foundation
+      { id: 's_contact1', tier: 1, path: 'Social Initiation', name: 'First Contact', missions: [
+        'Start 3 short conversations with people you do not normally talk to.',
+        'Start 10 conversations in one week.',
+        'Start a conversation with someone new every day for 14 days.'
+      ] },
+      { id: 's_listen1', tier: 1, path: 'Listening & Presence', name: 'Signal Lock', missions: [
+        'In 3 conversations, ask 3 follow-up questions before talking about yourself.',
+        'In 5 conversations, summarize what the person said before giving your response.',
+        'Have one 15-minute conversation where the other person does at least 70% of the talking.'
+      ] },
+      { id: 's_voice1', tier: 1, path: 'Voice & Delivery', name: 'Clear Channel', missions: [
+        'Record yourself speaking for 2 minutes and listen back.',
+        'Record yourself for 5 minutes and go 60 seconds straight with no filler words.',
+        'Record a 5-minute speech with clear pacing, volume, and no rushing.'
+      ] },
+      { id: 's_eye1', tier: 1, path: 'Voice & Delivery', name: 'Steady Signal', missions: [
+        'Maintain normal eye contact in 3 conversations without looking away constantly.',
+        'Hold eye contact while speaking in 5 conversations.',
+        'Give a 2-minute talk to someone while keeping calm eye contact.'
+      ] },
+
+      // Tier 2 – Developing
+      { id: 's_flow1', tier: 2, path: 'Social Initiation', name: 'Verbal Footwork', requires: [{ id: 's_contact1', tier: 2 }, { id: 's_listen1', tier: 1 }], missions: [
+        'Keep 3 conversations going for at least 5 minutes.',
+        'Keep 5 conversations going for at least 10 minutes.',
+        'End 3 conversations naturally without awkwardly cutting them off.'
+      ] },
+      { id: 's_story1', tier: 2, path: 'Storytelling', name: 'Campfire Protocol', requires: [{ id: 's_voice1', tier: 2 }, { id: 's_flow1', tier: 1 }], missions: [
+        'Tell one short personal story in under 2 minutes.',
+        'Tell a story with setup, tension, and payoff to 3 different people.',
+        'Tell a 3–5 minute story to a small group and ask for feedback.'
+      ] },
+      { id: 's_pressure1', tier: 2, path: 'Voice & Delivery', name: 'No-Freeze Mode', requires: [{ id: 's_voice1', tier: 2 }, { id: 's_eye1', tier: 2 }], missions: [
+        'Answer an unexpected question without immediately saying “I don’t know.”',
+        'Give a 60-second response on a random topic.',
+        'Do 5 random-topic responses and review the recordings.'
+      ] },
+      { id: 's_support1', tier: 2, path: 'Listening & Presence', name: 'Social Buff', requires: [{ id: 's_listen1', tier: 2 }], missions: [
+        'Give 3 genuine compliments that are not about appearance.',
+        'Encourage 5 people with specific, honest feedback.',
+        'Make someone feel genuinely supported during a hard moment.'
+      ] },
+
+      // Tier 3 – Advanced
+      { id: 's_public1', tier: 3, path: 'Public Performance', name: 'Stage Entry', requires: [{ id: 's_story1', tier: 2 }, { id: 's_pressure1', tier: 2 }], missions: [
+        'Give a prepared 3-minute talk to at least 3 people.',
+        'Give a prepared 5-minute talk to at least 5 people.',
+        'Give a 10-minute talk and receive feedback from at least 3 people.'
+      ] },
+      { id: 's_persuade1', tier: 3, path: 'Persuasion & Debate', name: 'Influence Engine', requires: [{ id: 's_flow1', tier: 3 }, { id: 's_listen1', tier: 3 }], missions: [
+        'Convince someone to try an idea, habit, or plan using logical reasons.',
+        'Make a persuasive argument using emotion, logic, and credibility.',
+        'Write and deliver a 3-minute persuasive pitch.'
+      ] },
+      { id: 's_debate1', tier: 3, path: 'Persuasion & Debate', name: 'Pressure Chamber', requires: [{ id: 's_pressure1', tier: 3 }, { id: 's_persuade1', tier: 1 }], missions: [
+        'Defend a position for 2 minutes without getting emotional.',
+        'Argue the opposite side of your own opinion.',
+        'Participate in a structured debate and identify what you did well and poorly.'
+      ] },
+      { id: 's_camera1', tier: 3, path: 'Public Performance', name: 'Broadcast Ready', requires: [{ id: 's_voice1', tier: 3 }, { id: 's_story1', tier: 2 }], missions: [
+        'Record a 2-minute video explaining something.',
+        'Record a 5-minute video with good pacing and no major rambling.',
+        'Publish or privately share a 5–10 minute video and ask for critique.'
+      ] },
+
+      // Tier 4 – Elite
+      { id: 's_negotiate1', tier: 4, path: 'Persuasion & Debate', name: 'Deal Maker', requires: [{ id: 's_persuade1', tier: 2 }, { id: 's_listen1', tier: 3 }], missions: [
+        'Negotiate a small improvement: price, deadline, favor, or deal.',
+        'Complete 3 real negotiations and document the outcome.',
+        'Negotiate a meaningful win while keeping the relationship positive.'
+      ] },
+      { id: 's_leader1', tier: 4, path: 'Leadership Communication', name: 'Command Presence', requires: [{ id: 's_public1', tier: 2 }, { id: 's_pressure1', tier: 3 }], missions: [
+        'Lead a group discussion for 10 minutes.',
+        'Give clear instructions to a group during an activity or project.',
+        'Lead a group through conflict, confusion, or pressure without losing control.'
+      ] },
+      { id: 's_teach1', tier: 4, path: 'Leadership Communication', name: 'Voice Transfer', requires: [{ id: 's_public1', tier: 3 }, { id: 's_camera1', tier: 2 }], missions: [
+        'Teach one person a skill for 15 minutes.',
+        'Teach 3 separate sessions and improve based on feedback.',
+        'Help someone measurably improve at a skill through your communication.'
+      ] },
+      { id: 's_keynote1', tier: 4, path: 'Public Performance', name: 'Signal Master', requires: [{ id: 's_leader1', tier: 3 }, { id: 's_public1', tier: 3 }, { id: 's_story1', tier: 3 }], missions: [
+        'Give a 10-minute talk to 10+ people.',
+        'Give a 15-minute talk to 20+ people.',
+        'Give a 20-minute talk to 30+ people with strong feedback.'
+      ] },
+    ]  
+  },  
+  purpose: {
+      "name": "Purpose",
+      "icon": "💛",
+      "emoji": "🎯",
+      "color": "#eab308",
+      "dim": "#4a3a00",
+      "skills": [
+          {
+              "id": "p_identity_1",
+              "tier": 1,
+              "path": "Self-Knowledge",
+              "name": "Identity Scan",
+              "missions": [
+                  "Write a 1-page honest self-audit: strengths, weaknesses, habits, fears, and current direction.",
+                  "Ask 3 trusted people what they think your biggest strength and weakness are.",
+                  "Compare your self-audit with their feedback and write a 'Who I Actually Am Right Now' summary."
+              ]
+          },
+          {
+              "id": "p_values_1",
+              "tier": 1,
+              "path": "Self-Knowledge",
+              "name": "Internal Compass",
+              "missions": [
+                  "List 10 values that matter to you.",
+                  "Narrow them to your top 5 and explain why each matters.",
+                  "Write a personal code of conduct based on those 5 values."
+              ]
+          },
+          {
+              "id": "p_curiosity_1",
+              "tier": 1,
+              "path": "Direction & Vision",
+              "name": "Open World",
+              "missions": [
+                  "Try 1 new activity, subject, or skill you would normally ignore.",
+                  "Try 3 new activities in one month and reflect on each.",
+                  "Choose one new activity that genuinely interested you and spend 10 focused hours exploring it."
+              ]
+          },
+          {
+              "id": "p_gratitude_1",
+              "tier": 1,
+              "path": "Faith / Meaning / Philosophy",
+              "name": "Grounded Mind",
+              "missions": [
+                  "Write 10 things you are grateful for.",
+                  "Keep a gratitude log for 7 straight days.",
+                  "Write a reflection on what you already have that you take for granted."
+              ]
+          },
+          {
+              "id": "p_vision_1",
+              "tier": 2,
+              "path": "Direction & Vision",
+              "name": "Future Map",
+              "missions": [
+                  "Write what your ideal life looks like 5 years from now.",
+                  "Break that vision into health, career, family, faith, relationships, finances, and character.",
+                  "Identify the 3 highest-priority goals that would most change your future."
+              ],
+              "requires": [
+                  {
+                      "id": "p_values_1",
+                      "tier": 2
+                  },
+                  {
+                      "id": "p_identity_1",
+                      "tier": 2
+                  }
+              ]
+          },
+          {
+              "id": "p_fear_1",
+              "tier": 2,
+              "path": "Courage & Discomfort",
+              "name": "Discomfort Gate",
+              "missions": [
+                  "Do one thing that makes you uncomfortable but is safe and constructive.",
+                  "Do one uncomfortable action per week for 4 weeks.",
+                  "Write what each fear revealed about your ego, insecurity, or avoidance."
+              ],
+              "requires": [
+                  {
+                      "id": "p_identity_1",
+                      "tier": 2
+                  }
+              ]
+          },
+          {
+              "id": "p_mentor_1",
+              "tier": 2,
+              "path": "Direction & Vision",
+              "name": "Guide Signal",
+              "missions": [
+                  "Identify 3 people you respect and explain why.",
+                  "Reach out to one mentor-type person for advice.",
+                  "Have 3 meaningful mentor conversations and write down the lessons."
+              ],
+              "requires": [
+                  {
+                      "id": "p_curiosity_1",
+                      "tier": 2
+                  },
+                  {
+                      "id": "p_values_1",
+                      "tier": 2
+                  }
+              ]
+          },
+          {
+              "id": "p_service_1",
+              "tier": 2,
+              "path": "Service & Impact",
+              "name": "Useful to Others",
+              "missions": [
+                  "Help someone with no reward expected.",
+                  "Volunteer or serve for 5 total hours.",
+                  "Serve 10 total hours and reflect on what problems you actually care about."
+              ],
+              "requires": [
+                  {
+                      "id": "p_gratitude_1",
+                      "tier": 2
+                  }
+              ]
+          },
+          {
+              "id": "p_mission_1",
+              "tier": 3,
+              "path": "Direction & Vision",
+              "name": "Purpose Code",
+              "missions": [
+                  "Draft a personal mission statement.",
+                  "Revise it after feedback from someone you trust.",
+                  "Memorize it and use it to make one real decision."
+              ],
+              "requires": [
+                  {
+                      "id": "p_vision_1",
+                      "tier": 2
+                  },
+                  {
+                      "id": "p_values_1",
+                      "tier": 3
+                  }
+              ]
+          },
+          {
+              "id": "p_discipline_1",
+              "tier": 3,
+              "path": "Discipline & Identity",
+              "name": "Become the Standard",
+              "missions": [
+                  "Choose one identity-based habit tied to your mission.",
+                  "Complete that habit for 30 straight days.",
+                  "Complete it for 90 straight days and document how it changed you."
+              ],
+              "requires": [
+                  {
+                      "id": "p_mission_1",
+                      "tier": 1
+                  },
+                  {
+                      "id": "p_fear_1",
+                      "tier": 2
+                  }
+              ]
+          },
+          {
+              "id": "p_suffering_1",
+              "tier": 3,
+              "path": "Faith / Meaning / Philosophy",
+              "name": "Meaning Under Pressure",
+              "missions": [
+                  "Write about one hard experience and what it taught you.",
+                  "Study one thinker, Scripture passage, book, or philosophy about suffering and meaning.",
+                  "Write your personal framework for handling pain, failure, and uncertainty."
+              ],
+              "requires": [
+                  {
+                      "id": "p_identity_1",
+                      "tier": 3
+                  },
+                  {
+                      "id": "p_gratitude_1",
+                      "tier": 3
+                  }
+              ]
+          },
+          {
+              "id": "p_impact_1",
+              "tier": 3,
+              "path": "Service & Impact",
+              "name": "Build for Others",
+              "missions": [
+                  "Start a project that helps someone other than yourself.",
+                  "Spend 20 total hours building, serving, or improving it.",
+                  "Finish the project and get feedback from someone it affected."
+              ],
+              "requires": [
+                  {
+                      "id": "p_service_1",
+                      "tier": 3
+                  },
+                  {
+                      "id": "p_mission_1",
+                      "tier": 1
+                  }
+              ]
+          },
+          {
+              "id": "p_conviction_1",
+              "tier": 4,
+              "path": "Courage & Discomfort",
+              "name": "No Matter What",
+              "missions": [
+                  "Identify one belief or standard you refuse to compromise.",
+                  "Make one difficult decision that protects that standard.",
+                  "Write about what it cost you and why it was worth it."
+              ],
+              "requires": [
+                  {
+                      "id": "p_discipline_1",
+                      "tier": 2
+                  },
+                  {
+                      "id": "p_suffering_1",
+                      "tier": 2
+                  }
+              ]
+          },
+          {
+              "id": "p_operating_1",
+              "tier": 4,
+              "path": "Faith / Meaning / Philosophy",
+              "name": "Personal Doctrine",
+              "missions": [
+                  "Write your rules for faith, family, work, discipline, money, health, and relationships.",
+                  "Live by those rules for 30 days and track failures.",
+                  "Revise them into a clean personal doctrine you can reread monthly."
+              ],
+              "requires": [
+                  {
+                      "id": "p_mission_1",
+                      "tier": 3
+                  },
+                  {
+                      "id": "p_suffering_1",
+                      "tier": 3
+                  }
+              ]
+          },
+          {
+              "id": "p_legacy_1",
+              "tier": 4,
+              "path": "Legacy",
+              "name": "Thirty-Year Pride",
+              "missions": [
+                  "Choose one long-term project you would be proud of in 30 years.",
+                  "Put 50 focused hours into it.",
+                  "Publish, present, launch, or complete a meaningful version of it."
+              ],
+              "requires": [
+                  {
+                      "id": "p_impact_1",
+                      "tier": 3
+                  },
+                  {
+                      "id": "p_operating_1",
+                      "tier": 2
+                  }
+              ]
+          },
+          {
+              "id": "p_embodied_1",
+              "tier": 4,
+              "path": "Legacy",
+              "name": "Integrated Life",
+              "missions": [
+                  "Live for 30 days where your schedule clearly reflects your mission.",
+                  "Live for 90 days with your habits, goals, and relationships aligned to your mission.",
+                  "Write a full before-and-after reflection proving how your identity changed."
+              ],
+              "requires": [
+                  {
+                      "id": "p_conviction_1",
+                      "tier": 3
+                  },
+                  {
+                      "id": "p_legacy_1",
+                      "tier": 3
+                  },
+                  {
+                      "id": "p_discipline_1",
+                      "tier": 3
+                  }
+              ]
+          }
+      ]
+  },
+  hockey: {  
+    name: 'Hockey',  
+    icon: '❤️',  
+    emoji: '🥅',  
+    color: '#ef4444',  
+    dim: '#5e1a1a',  
+    skills: [  
+      { id: 'h_edge_1', tier: 1, path: 'Movement Efficiency', name: 'Edge Control', missions: [
+        'Complete 100 controlled shuffles without crossing feet or losing posture.',
+        'Complete 100 T-pushes with full stops and balanced set position.',
+        'Film 10 minutes of movement work and identify 3 wasted-motion habits.'
+      ] },
+      { id: 'h_angle_1', tier: 1, path: 'Positioning & Angles', name: 'Angle Lock', missions: [
+        'Film yourself from shooter perspective on 10 shots and check if you are centered.',
+        'Correct depth and angle on 25 tracked shots in practice.',
+        'Complete one practice where your main focus is beating shots through positioning, not reaction.'
+      ] },
+      { id: 'h_patience_1', tier: 1, path: 'Patience & Read Discipline', name: 'Hold Your Feet', missions: [
+        'In practice, stay on your feet until the release on 20 shots.',
+        'Track 30 shots where you resisted dropping early.',
+        'Film a drill and mark every time you dropped, slid, or reached before the puck forced it.'
+      ] },
+      { id: 'h_tracking_1', tier: 1, path: 'Puck Tracking & Saves', name: 'Eyes First', missions: [
+        'Track 25 pucks all the way into your body, glove, or blocker.',
+        'Call out where each puck hit you on 30 saves.',
+        'Complete a practice segment where every save has a controlled visual finish.'
+      ] },
+
+      { id: 'h_slide_1', tier: 2, path: 'Movement Efficiency', name: 'Controlled Power', requires: [{ id: 'h_edge_1', tier: 2 }, { id: 'h_patience_1', tier: 1 }], missions: [
+        'Complete 50 butterfly slides with full stops and no drifting.',
+        'Complete 50 recoveries from butterfly into balanced stance.',
+        'Film lateral movement and identify whether each slide was necessary or excessive.'
+      ] },
+      { id: 'h_depth_1', tier: 2, path: 'Positioning & Angles', name: 'Depth Discipline', requires: [{ id: 'h_angle_1', tier: 2 }, { id: 'h_patience_1', tier: 2 }], missions: [
+        'Track 20 shots where you intentionally manage depth based on threat level.',
+        'Correctly adjust depth on 10 rush shots and 10 in-zone shots.',
+        'Review video and identify 5 moments where better depth would have made the save easier.'
+      ] },
+      { id: 'h_rebound_1', tier: 2, path: 'Rebound Control', name: 'Second Save Prevention', requires: [{ id: 'h_tracking_1', tier: 2 }], missions: [
+        'Direct 25 low shots to corners or safe areas.',
+        'Freeze or control 15 shots instead of kicking rebounds into danger.',
+        'Complete one practice segment with no uncontrolled rebounds into the slot.'
+      ] },
+      { id: 'h_selection_1', tier: 2, path: 'Puck Tracking & Saves', name: 'Right Tool', requires: [{ id: 'h_tracking_1', tier: 2 }, { id: 'h_angle_1', tier: 2 }], missions: [
+        'Identify when to use glove, blocker, butterfly, pad seal, or chest save on 25 shots.',
+        'Film 20 shots and label whether your save selection was efficient.',
+        'Complete a drill where you make saves without extra reaching, lunging, or unnecessary movement.'
+      ] },
+
+      { id: 'h_rush_1', tier: 3, path: 'Post Play & In-Zone Reads', name: 'Threat Scanner', requires: [{ id: 'h_depth_1', tier: 2 }, { id: 'h_selection_1', tier: 2 }], missions: [
+        'Track 10 rush chances and identify shot vs pass threat.',
+        'Stop 5 controlled 2-on-1 situations in practice or scrimmage.',
+        'Review 5 rush clips and explain what information told you to hold, slide, or challenge.'
+      ] },
+      { id: 'h_post_1', tier: 3, path: 'Post Play & In-Zone Reads', name: 'Seal System', requires: [{ id: 'h_slide_1', tier: 2 }, { id: 'h_depth_1', tier: 2 }], missions: [
+        'Complete 50 clean RVH entries and exits without losing balance.',
+        'Defend 20 below-goal-line or sharp-angle plays without overcommitting.',
+        'Film post-play work and identify 3 improvements in seal, patience, or recovery.'
+      ] },
+      { id: 'h_traffic_1', tier: 3, path: 'Puck Tracking & Saves', name: 'Find the Lane', requires: [{ id: 'h_tracking_1', tier: 3 }, { id: 'h_rebound_1', tier: 2 }], missions: [
+        'Track 15 screened shots and identify sightline before release.',
+        'Make 10 saves through traffic while maintaining body control.',
+        'Complete a practice segment where you fight for sightlines without drifting out of angle.'
+      ] },
+      { id: 'h_puck_1', tier: 3, path: 'Puck Handling', name: 'Third Defenseman', requires: [{ id: 'h_edge_1', tier: 2 }], missions: [
+        'Stop and settle 20 rims cleanly.',
+        'Make 15 clean forehand or backhand passes to a target.',
+        'Complete 5 live breakout touches under pressure without a turnover.'
+      ] },
+
+      { id: 'h_film_1', tier: 4, path: 'Mental Game & Performance', name: 'Film Room', requires: [{ id: 'h_rush_1', tier: 2 }, { id: 'h_post_1', tier: 2 }], missions: [
+        'Review one full game and identify 5 preventable mistakes.',
+        'Create a correction plan from your film review.',
+        'Prove improvement by comparing two games and showing reduced repeat mistakes.'
+      ] },
+      { id: 'h_reset_1', tier: 4, path: 'Mental Game & Performance', name: 'Next Shot Mode', requires: [{ id: 'h_patience_1', tier: 3 }, { id: 'h_film_1', tier: 1 }], missions: [
+        'Build a 10-second post-goal reset routine.',
+        'Use the reset routine after goals in 3 practices or games.',
+        'After allowing a goal, make the next 5 saves without changing your structure or chasing the game.'
+      ] },
+      { id: 'h_junior_1', tier: 4, path: 'Mental Game & Performance', name: '.915 Path', requires: [{ id: 'h_film_1', tier: 2 }, { id: 'h_reset_1', tier: 2 }, { id: 'h_rebound_1', tier: 3 }], missions: [
+        'Track save percentage, goals allowed, rebound goals, and preventable goals for 5 games.',
+        'Maintain .910+ over a 5-game sample while reducing preventable goals.',
+        'Maintain .915+ over a 10-game sample with written film notes after each game.'
+      ] },
+      { id: 'h_elite_1', tier: 4, path: 'Mental Game & Performance', name: '.920 Standard', requires: [{ id: 'h_junior_1', tier: 3 }, { id: 'h_rush_1', tier: 3 }, { id: 'h_post_1', tier: 3 }], missions: [
+        'Maintain .915+ over 10 games.',
+        'Maintain .920+ over 10 games.',
+        'Maintain .920+ over a full season sample while tracking preventable goals, rebound goals, and game-impact saves.'
+      ] },
+    ]  
+  },  
+  knowledge: {  
+    name: 'Knowledge',  
+    icon: '💚',  
+    emoji: '🧠',  
+    color: '#22c55e',  
+    dim: '#0f3a1f',  
+    skills: [  
+      { id: 'k_reader_1', tier: 1, path: 'Reading & Comprehension', name: 'Input Discipline', missions: [
+        'Read for 20 minutes every day for 7 days.',
+        'Read for 20 minutes every day for 30 days.',
+        'Finish one complete book and write a 1-page summary.'
+      ] },
+      { id: 'k_notes_1', tier: 1, path: 'Memory & Retention', name: 'Capture System', missions: [
+        'Take notes on one article, video, or chapter.',
+        'Create a simple note system with sections for books, ideas, quotes, and questions.',
+        'Add notes from 10 different learning sessions into your system.'
+      ] },
+      { id: 'k_memory_1', tier: 1, path: 'Memory & Retention', name: 'Recall Engine', missions: [
+        'Memorize and recall 10 important facts, quotes, formulas, or concepts.',
+        'Use spaced repetition or flashcards for 7 straight days.',
+        'Recall 30 learned items from memory without looking.'
+      ] },
+      { id: 'k_question_1', tier: 1, path: 'Research & Source Analysis', name: 'Why Mode', missions: [
+        'Write down 10 serious questions you want answers to.',
+        'Research one question for 30 minutes and write what you found.',
+        'Turn one question into a mini research topic with sources.'
+      ] },
+
+      { id: 'k_books_1', tier: 2, path: 'Reading & Comprehension', name: 'Complete the Stack', requires: [{ id: 'k_reader_1', tier: 2 }, { id: 'k_notes_1', tier: 1 }], missions: [
+        'Finish one nonfiction book and write 5 takeaways.',
+        'Finish 3 nonfiction books from different categories.',
+        'Finish 5 nonfiction books and compare the ideas between them.'
+      ] },
+      { id: 'k_explain_1', tier: 2, path: 'Writing & Explanation', name: 'Teach the Idea', requires: [{ id: 'k_notes_1', tier: 2 }, { id: 'k_memory_1', tier: 2 }], missions: [
+        'Explain one concept out loud in under 2 minutes.',
+        'Explain 3 concepts to someone else without notes.',
+        'Create a written or video explanation that a beginner could understand.'
+      ] },
+      { id: 'k_logic_1', tier: 2, path: 'Critical Thinking', name: 'Argument Scanner', requires: [{ id: 'k_question_1', tier: 2 }], missions: [
+        'Learn 10 common logical fallacies.',
+        'Identify 5 fallacies or weak arguments in real articles, debates, or social media posts.',
+        'Rewrite one weak argument into a stronger version.'
+      ] },
+      { id: 'k_source_1', tier: 2, path: 'Research & Source Analysis', name: 'Truth Filter', requires: [{ id: 'k_question_1', tier: 2 }, { id: 'k_notes_1', tier: 2 }], missions: [
+        'Compare 3 sources on the same topic.',
+        'Identify bias, evidence quality, and missing context in each source.',
+        'Write a short source analysis explaining which source is most reliable and why.'
+      ] },
+
+      { id: 'k_history_1', tier: 3, path: 'History & Worldview', name: 'Civilization Map', requires: [{ id: 'k_books_1', tier: 2 }, { id: 'k_source_1', tier: 2 }], missions: [
+        'Study one major historical era or civilization.',
+        'Create a timeline of 15 major events from that era.',
+        'Explain how geography, economics, religion, and power shaped that era.'
+      ] },
+      { id: 'k_science_1', tier: 3, path: 'Science & Systems', name: 'Reality Model', requires: [{ id: 'k_explain_1', tier: 2 }, { id: 'k_books_1', tier: 1 }], missions: [
+        'Complete one beginner unit in biology, chemistry, physics, or astronomy.',
+        'Explain 5 scientific concepts with real-world examples.',
+        'Use science to explain one real-world system, like nutrition, climate, engines, medicine, or training.'
+      ] },
+      { id: 'k_writing_1', tier: 3, path: 'Writing & Explanation', name: 'Clear Mind', requires: [{ id: 'k_explain_1', tier: 2 }, { id: 'k_logic_1', tier: 2 }], missions: [
+        'Write a 500-word explanation of a complex topic.',
+        'Write a 1,000-word essay with a clear argument and evidence.',
+        'Revise the essay after feedback and make it clearer.'
+      ] },
+      { id: 'k_models_1', tier: 3, path: 'Strategy & Decision-Making', name: 'Decision Toolkit', requires: [{ id: 'k_logic_1', tier: 2 }, { id: 'k_source_1', tier: 2 }], missions: [
+        'Learn 10 mental models, such as opportunity cost, inversion, compounding, incentives, feedback loops, and second-order thinking.',
+        'Apply 3 mental models to real decisions in your life.',
+        'Build a personal decision checklist using your best mental models.'
+      ] },
+
+      { id: 'k_research_1', tier: 4, path: 'Research & Source Analysis', name: 'Deep Work File', requires: [{ id: 'k_source_1', tier: 3 }, { id: 'k_writing_1', tier: 2 }], missions: [
+        'Pick one serious topic and collect 5 credible sources.',
+        'Write a 1,500+ word research brief with citations.',
+        'Present your findings to someone and answer questions.'
+      ] },
+      { id: 'k_poly_1', tier: 4, path: 'History & Worldview', name: 'Five Domains', requires: [{ id: 'k_history_1', tier: 2 }, { id: 'k_science_1', tier: 2 }, { id: 'k_models_1', tier: 2 }], missions: [
+        'Demonstrate basic knowledge in 3 fields.',
+        'Demonstrate working knowledge in 5 fields.',
+        'Connect ideas from 3 different fields into one useful insight or project.'
+      ] },
+      { id: 'k_steelman_1', tier: 4, path: 'Critical Thinking', name: 'Steelman', requires: [{ id: 'k_logic_1', tier: 3 }, { id: 'k_source_1', tier: 3 }], missions: [
+        'Write the strongest possible argument for a view you disagree with.',
+        'Explain that view fairly to someone else.',
+        'Compare both sides and state what each side gets right and wrong.'
+      ] },
+      { id: 'k_teacher_1', tier: 4, path: 'Writing & Explanation', name: 'Knowledge Transfer', requires: [{ id: 'k_research_1', tier: 2 }, { id: 'k_explain_1', tier: 3 }], missions: [
+        'Teach one subject in a 15-minute session.',
+        'Teach 3 sessions and improve based on feedback.',
+        'Help someone measurably improve their understanding.'
+      ] },
+      { id: 'k_archive_1', tier: 4, path: 'Memory & Retention', name: 'Second Brain', requires: [{ id: 'k_notes_1', tier: 3 }, { id: 'k_poly_1', tier: 2 }, { id: 'k_models_1', tier: 3 }], missions: [
+        'Organize your notes into a searchable system.',
+        'Create summaries for your top 20 most important notes.',
+        'Use your note system to solve a real problem, make a decision, or create a project.'
+      ] },
+    ]  
+  },  
+  health: {  
+    name: 'Health',  
+    icon: '🧡',  
+    emoji: '❤️',  
+    color: '#f97316',  
+    dim: '#4a2200',  
+    skills: [  
+      { id: 'he_sleep_1', tier: 1, path: 'Sleep & Recovery', name: 'Shutdown Protocol', missions: [
+        'Sleep 8+ hours once and record bedtime and wake time.',
+        'Get 8+ hours of sleep for 5 nights in one week.',
+        'Keep a consistent sleep/wake window within 60 minutes for 14 days.'
+      ] },
+      { id: 'he_hydration_1', tier: 1, path: 'Nutrition & Hydration', name: 'Fluid System', missions: [
+        'Drink water first thing in the morning for 3 days.',
+        'Hit a daily hydration target for 7 days.',
+        'Hit your hydration target for 21 days and notice how it affects energy and training.'
+      ] },
+      { id: 'he_food_1', tier: 1, path: 'Nutrition & Hydration', name: 'Fuel Quality', missions: [
+        'Eat one balanced meal with protein, carbs, fruits or vegetables, and healthy fats.',
+        'Eat one balanced meal per day for 7 days.',
+        'Eat two balanced meals per day for 14 days.'
+      ] },
+      { id: 'he_movement_1', tier: 1, path: 'Strength & Conditioning', name: 'Body Online', missions: [
+        'Move intentionally for 20 minutes in one day.',
+        'Move intentionally for 20 minutes per day for 7 days.',
+        'Move intentionally for 20 minutes per day for 21 days.'
+      ] },
+
+      { id: 'he_strength_1', tier: 2, path: 'Strength & Conditioning', name: 'Base Armor', requires: [{ id: 'he_movement_1', tier: 2 }, { id: 'he_food_1', tier: 1 }], missions: [
+        'Complete 3 strength sessions in one week.',
+        'Complete 3 strength sessions per week for 4 weeks.',
+        'Track lifts or exercises for 8 weeks and show progression.'
+      ] },
+      { id: 'he_mobility_1', tier: 2, path: 'Mobility & Durability', name: 'Joint Access', requires: [{ id: 'he_movement_1', tier: 2 }], missions: [
+        'Complete a 10-minute mobility routine once.',
+        'Complete mobility 4 times per week for 3 weeks.',
+        'Identify your 3 tightest or weakest areas and build a targeted routine.'
+      ] },
+      { id: 'he_recovery_1', tier: 2, path: 'Sleep & Recovery', name: 'Recharge Cycle', requires: [{ id: 'he_sleep_1', tier: 2 }, { id: 'he_hydration_1', tier: 2 }], missions: [
+        'Do a 10-minute recovery session: breathing, stretching, walking, or light mobility.',
+        'Complete 3 recovery sessions in one week.',
+        'Use recovery habits after hard training for 3 straight weeks.'
+      ] },
+      { id: 'he_hygiene_1', tier: 2, path: 'Hygiene & Environment', name: 'Clean Base', requires: [{ id: 'he_movement_1', tier: 1 }], missions: [
+        'Complete a full hygiene reset: shower, brush teeth, clean clothes, deodorant, laundry started.',
+        'Maintain daily hygiene for 7 days.',
+        'Keep room, training gear, and laundry organized for 14 days.'
+      ] },
+
+      { id: 'he_nutrition_1', tier: 3, path: 'Nutrition & Hydration', name: 'Athlete Fuel', requires: [{ id: 'he_food_1', tier: 3 }, { id: 'he_strength_1', tier: 1 }], missions: [
+        'Eat a proper pre-training meal or snack 3 times.',
+        'Eat proper pre- and post-training fuel for 2 weeks.',
+        'Build a repeatable training-day meal plan that improves energy and recovery.'
+      ] },
+      { id: 'he_conditioning_1', tier: 3, path: 'Strength & Conditioning', name: 'Work Capacity', requires: [{ id: 'he_strength_1', tier: 2 }, { id: 'he_recovery_1', tier: 2 }], missions: [
+        'Complete 3 conditioning sessions in one week.',
+        'Complete 2–3 conditioning sessions per week for 4 weeks.',
+        'Improve one conditioning benchmark, such as a timed run, bike test, shuttle, or repeated sprint test.'
+      ] },
+      { id: 'he_stress_1', tier: 3, path: 'Mental Health & Stress', name: 'Nervous System Command', requires: [{ id: 'he_sleep_1', tier: 2 }, { id: 'he_recovery_1', tier: 1 }], missions: [
+        'Use one stress-control method during a stressful moment: breathing, journaling, walking, prayer, or talking it out.',
+        'Use a stress-control method 5 times in two weeks.',
+        'Build a personal 10-minute reset routine for stress, anxiety, anger, or sadness.'
+      ] },
+      { id: 'he_tracking_1', tier: 3, path: 'Health Tracking', name: 'Body Dashboard', requires: [{ id: 'he_sleep_1', tier: 3 }, { id: 'he_hydration_1', tier: 3 }], missions: [
+        'Track sleep, hydration, training, mood, and energy for 7 days.',
+        'Track sleep, hydration, training, mood, and energy for 30 days.',
+        'Identify 3 patterns and make one adjustment based on the data.'
+      ] },
+
+      { id: 'he_injury_1', tier: 4, path: 'Injury Prevention & Longevity', name: 'Durability Protocol', requires: [{ id: 'he_mobility_1', tier: 3 }, { id: 'he_strength_1', tier: 2 }], missions: [
+        'Identify your top 3 injury-risk areas based on sport, posture, pain, or weakness.',
+        'Complete targeted prehab 3 times per week for 4 weeks.',
+        'Go 8 weeks without preventable missed training while maintaining prehab.'
+      ] },
+      { id: 'he_recovery_2', tier: 4, path: 'Sleep & Recovery', name: 'High Output, Low Breakdown', requires: [{ id: 'he_recovery_1', tier: 3 }, { id: 'he_tracking_1', tier: 2 }], missions: [
+        'Build a full weekly recovery system: sleep, hydration, mobility, nutrition, deload, and stress reset.',
+        'Follow that recovery system for 4 weeks.',
+        'Maintain hard training while keeping energy, mood, and soreness stable for 4 weeks.'
+      ] },
+      { id: 'he_resilience_1', tier: 4, path: 'Mental Health & Stress', name: 'Stable Under Load', requires: [{ id: 'he_stress_1', tier: 3 }, { id: 'he_sleep_1', tier: 3 }], missions: [
+        'Write a plan for handling bad days without spiraling into destructive habits.',
+        'Use the plan during 3 difficult days.',
+        'Prove through reflection that you can handle stress without abandoning your standards.'
+      ] },
+      { id: 'he_complete_1', tier: 4, path: 'Injury Prevention & Longevity', name: 'Operating Body', requires: [{ id: 'he_nutrition_1', tier: 3 }, { id: 'he_injury_1', tier: 2 }, { id: 'he_tracking_1', tier: 3 }], missions: [
+        'Build a weekly health schedule covering sleep, food, training, recovery, mobility, hygiene, and stress.',
+        'Follow it for 30 days.',
+        'Follow it for 90 days and write a before/after report on energy, performance, mood, and discipline.'
+      ] }
+    ]  
+  }  
+};  
+  
+
+// ═══════════════════════════════════════════  
+// APP OPERATING SYSTEM STATE + HELPERS
+// ═══════════════════════════════════════════  
+let state = {};
+let currentBranch = null;
+let currentSkill = null;
+
+const XP_VALUES = [0, 100, 250, 500];
+const RANKS = {
+  finance: ['Rookie Saver','Budget Operator','Investor Apprentice','Wealth Builder','Finance Pro'],
+  speech: ['Quiet Starter','Conversation Builder','Clear Speaker','Influence Operator','Signal Master'],
+  purpose: ['Wanderer','Values Builder','Mission Seeker','Conviction Carrier','Purpose Embodied'],
+  hockey: ['Crease Rookie','Technical Goalie','Game Reader','Junior Standard','Elite Goaltender'],
+  knowledge: ['Curious Student','Note Builder','Critical Thinker','Research Operator','Wisdom Builder'],
+  health: ['Baseline Builder','Recovery Trainee','Athlete Engine','Durability Operator','Complete System']
+};
+
+function todayKey(date = new Date()) { return date.toISOString().slice(0,10); }
+function weekKey(date = new Date()) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  const week = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(week).padStart(2,'0')}`;
+}
+function daysBetween(a,b) { return Math.round((new Date(b) - new Date(a)) / 86400000); }
+function blankState() { return { progress:{}, journal:[], focusBranch:'hockey', focusQuest:null, reviews:[], streaks:{active:{count:0,lastDate:''}} }; }
+function migrateOldState(parsed) {
+  const fresh = blankState();
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return fresh;
+  if (parsed.progress) return Object.assign(fresh, parsed);
+  Object.keys(BRANCHES).forEach(bKey => { if (parsed[bKey] && typeof parsed[bKey] === 'object') fresh.progress[bKey] = parsed[bKey]; });
+  return fresh;
+}
+function loadState() {
+  try { const saved = localStorage.getItem('lifeTreeState'); state = saved ? migrateOldState(JSON.parse(saved)) : blankState(); } catch(e) { state = blankState(); }
+  Object.keys(BRANCHES).forEach(bKey => {
+    if (!state.progress[bKey] || typeof state.progress[bKey] !== 'object') state.progress[bKey] = {};
+    BRANCHES[bKey].skills.forEach(sk => {
+      const savedSkill = state.progress[bKey][sk.id];
+      if (!savedSkill || typeof savedSkill !== 'object') state.progress[bKey][sk.id] = { tier:0 };
+      const tier = Number(state.progress[bKey][sk.id].tier || 0);
+      state.progress[bKey][sk.id].tier = Number.isFinite(tier) ? Math.max(0, Math.min(3, Math.floor(tier))) : 0;
+    });
+  });
+  if (!BRANCHES[state.focusBranch]) state.focusBranch = 'hockey';
+  if (!Array.isArray(state.journal)) state.journal = [];
+  if (!Array.isArray(state.reviews)) state.reviews = [];
+  if (!state.streaks || typeof state.streaks !== 'object') state.streaks = { active:{count:0,lastDate:''} };
+  if (state.focusQuest && (!state.focusQuest.branch || !state.focusQuest.skillId)) state.focusQuest = null;
+}
+function saveState() { try { localStorage.setItem('lifeTreeState', JSON.stringify(state)); } catch(e) {} }
+function getRequirementProgress(bKey, requirement) { if (typeof requirement === 'string') return { id: requirement, needed: 3 }; return { id: requirement.id, needed: requirement.tier || 3 }; }
+function getSavedTier(bKey, skillId) { const tier = Number(state?.progress?.[bKey]?.[skillId]?.tier || 0); return Number.isFinite(tier) ? Math.max(0, Math.min(3, Math.floor(tier))) : 0; }
+function setSavedTier(bKey, skillId, tier) { state.progress[bKey][skillId].tier = Math.max(0, Math.min(3, Math.floor(Number(tier)||0))); }
+function getSkillById(bKey, skillId) { return BRANCHES[bKey]?.skills.find(s => s.id === skillId); }
+function getSkillStatus(bKey, skill) {
+  const t = getSavedTier(bKey, skill.id);
+  if (t >= 3) return 'completed';
+  if (!skill.requires || skill.requires.length === 0) return t === 0 ? 'available' : 'in-progress';
+  const allDone = skill.requires.every(req => { const rule = getRequirementProgress(bKey, req); return getSavedTier(bKey, rule.id) >= rule.needed; });
+  if (!allDone) return 'locked';
+  return t === 0 ? 'available' : 'in-progress';
+}
+function getMissingRequirements(bKey, skill) {
+  return (skill.requires || []).filter(req => { const rule = getRequirementProgress(bKey, req); return getSavedTier(bKey, rule.id) < rule.needed; }).map(req => {
+    const rule = getRequirementProgress(bKey, req); const reqSkill = getSkillById(bKey, rule.id);
+    return { name: reqSkill ? reqSkill.name : rule.id, needed: rule.needed, current: getSavedTier(bKey, rule.id) };
+  });
+}
+function getRequirementText(bKey, skill) { const missing = getMissingRequirements(bKey, skill); return missing.length ? missing.map(m => `• ${m.name}: Tier ${m.current}/${m.needed}`).join('\n') : 'Requirements met.'; }
+function getMissionText(bKey, skill) {
+  const currentTier = getSavedTier(bKey, skill.id);
+  const index = Math.min(currentTier, (skill.missions || []).length - 1);
+  return (skill.missions && skill.missions[index]) || skill.mission || '';
+}
+function getDifficultyLabel(skill, nextTier = 1) { const score = Number(skill.tier || 1) + Number(nextTier || 1) - 1; if (score <= 2) return 'Easy'; if (score <= 4) return 'Medium'; if (score <= 5) return 'Hard'; return 'Elite'; }
+function skillXPForTier(skill, tierCompleted) { const base = XP_VALUES[tierCompleted] || 0; return base + (skill.tier >= 4 && tierCompleted === 3 ? 250 : 0); }
+function getTotalXP() { let xp = 0; Object.keys(BRANCHES).forEach(bKey => BRANCHES[bKey].skills.forEach(skill => { const t = getSavedTier(bKey, skill.id); for (let i=1;i<=t;i++) xp += skillXPForTier(skill,i); })); return xp; }
+function getLevel(xp = getTotalXP()) { return Math.max(1, Math.floor(xp / 1000) + 1); }
+function getBranchXP(bKey) { let xp = 0; BRANCHES[bKey].skills.forEach(skill => { const t = getSavedTier(bKey, skill.id); for (let i=1;i<=t;i++) xp += skillXPForTier(skill,i); }); return xp; }
+function getBranchRank(bKey) { const idx = Math.min(4, Math.floor(getBranchXP(bKey) / 2000)); return (RANKS[bKey] || ['Rookie','Builder','Operator','Advanced','Master'])[idx]; }
+function getBranchProgress(bKey) { const skills = BRANCHES[bKey].skills; const completed = skills.filter(sk => getSavedTier(bKey, sk.id) >= 3).length; return { completed, total: skills.length, pct: Math.round((completed / skills.length) * 100) }; }
+function isOneStepAway(bKey, skill) { return !!(skill.requires && getSkillStatus(bKey, skill) === 'locked' && getMissingRequirements(bKey, skill).length === 1); }
+function getRecentJournalDays(days) { const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days); return state.journal.filter(j => new Date(j.date) >= cutoff); }
+
+function setFocusBranch(bKey) { if (!BRANCHES[bKey]) return; state.focusBranch = bKey; state.focusQuest = null; saveState(); renderOverview(); }
+function getAvailableQuestsForBranch(bKey) {
+  const branch = BRANCHES[bKey];
+  if (!branch) return [];
+  return branch.skills.filter(skill => {
+    const status = getSkillStatus(bKey, skill);
+    return status === 'available' || status === 'in-progress';
+  }).map(skill => ({ branch:bKey, skillId:skill.id, status:getSkillStatus(bKey, skill), tier:getSavedTier(bKey, skill.id) }));
+}
+function pickFocusQuest() {
+  const select = document.getElementById('focus-select');
+  const bKey = select ? select.value : state.focusBranch;
+  if (!BRANCHES[bKey]) return;
+  state.focusBranch = bKey;
+  const pool = getAvailableQuestsForBranch(bKey);
+  if (!pool.length) state.focusQuest = null;
+  else state.focusQuest = pool[Math.floor(Math.random() * pool.length)];
+  saveState();
+  renderDashboard();
+}
+function renderFocusQuest() {
+  const qBox = document.getElementById('focus-quest');
+  if (!qBox) return;
+  const q = state.focusQuest;
+  if (!q || q.branch !== state.focusBranch || !getSkillById(q.branch, q.skillId) || !['available','in-progress'].includes(getSkillStatus(q.branch, getSkillById(q.branch, q.skillId)))) {
+    qBox.innerHTML = '<div class="dash-value" style="margin-top:10px;">Pick a category, then press Pick Quest to randomly select an unlocked mission from that branch.</div>';
+    return;
+  }
+  const skill = getSkillById(q.branch, q.skillId), branch = BRANCHES[q.branch], nextTier = getSavedTier(q.branch,q.skillId)+1;
+  qBox.innerHTML = `<div class="quest-item" onclick="openMission('${q.branch}', getSkillById('${q.branch}','${q.skillId}'))" style="--qcolor:${branch.color}; margin-top:10px;"><div class="quest-branch-dot"></div><div><div class="quest-title">${branch.name} · ${skill.name}</div><div class="quest-text">${getMissionText(q.branch, skill)}</div></div><div class="difficulty-tag">${getDifficultyLabel(skill,nextTier)}</div></div>`;
+}
+function renderDashboard() {
+  const xp = getTotalXP(), level = getLevel(xp), next = level * 1000;
+  const levelPill = document.getElementById('level-pill'); if (levelPill) levelPill.textContent = `LEVEL ${level} · ${xp}/${next} XP`;
+  const focusSelect = document.getElementById('focus-select');
+  if (focusSelect) { focusSelect.innerHTML = Object.keys(BRANCHES).map(k => `<option value="${k}" ${state.focusBranch===k?'selected':''}>${BRANCHES[k].emoji || BRANCHES[k].icon || ''} ${BRANCHES[k].name} · ${getBranchRank(k)}</option>`).join(''); focusSelect.onchange = () => setFocusBranch(focusSelect.value); }
+  renderFocusQuest();
+  const streak = state.streaks?.active || {count:0,lastDate:''};
+  const streakSummary = document.getElementById('streak-summary'); if (streakSummary) streakSummary.textContent = `Active-day streak: ${streak.count || 0} · Completed this week: ${getRecentJournalDays(7).length} · Focus: ${BRANCHES[state.focusBranch].name}`;
+}
+
+function renderOverview() {
+  document.getElementById('total-xp-display').textContent = getTotalXP();
+  renderDashboard();
+  const grid = document.getElementById('branches-grid'); grid.innerHTML = '';
+  Object.keys(BRANCHES).forEach(bKey => { const branch = BRANCHES[bKey], prog = getBranchProgress(bKey); const card = document.createElement('div'); card.className = 'branch-card'; card.dataset.branch = bKey; card.style.setProperty('--color', branch.color); card.style.setProperty('--glow', branch.color + '18'); card.onclick = () => openBranch(bKey); card.innerHTML = `<span class="branch-icon">${branch.emoji || branch.icon || '✦'}</span><div class="branch-name">${branch.name}</div><div class="branch-progress-bar"><div class="branch-progress-fill" style="width:${prog.pct}%"></div></div><div class="branch-stats"><strong>${prog.completed}</strong>/${prog.total} skills · ${getBranchRank(bKey)}</div>`; grid.appendChild(card); });
+}
+function openBranch(bKey) { currentBranch = bKey; const branch = BRANCHES[bKey], prog = getBranchProgress(bKey); document.getElementById('bv-name').style.color = branch.color; document.getElementById('bv-name').style.textShadow = `0 0 12px ${branch.color}`; document.getElementById('bv-name').textContent = branch.name.toUpperCase(); document.getElementById('bv-xp').textContent = `${getBranchXP(bKey)} XP · ${prog.completed}/${prog.total} SKILLS · ${getBranchRank(bKey)}`; renderTree(bKey); const view = document.getElementById('branch-view'); view.style.transform=''; view.style.opacity=''; view.classList.add('active'); view.scrollTop = 0; }
+function closeBranch() { const branchView = document.getElementById('branch-view'); branchView.classList.remove('active','swiping-back','returning-home'); branchView.style.transform=''; branchView.style.opacity=''; currentBranch = null; renderOverview(); }
+function renderTree(bKey) {
+  const branch = BRANCHES[bKey], color = branch.color, container = document.getElementById('tree-container'); container.innerHTML = '';
+  const tiers = {}; branch.skills.forEach(sk => { if (!tiers[sk.tier]) tiers[sk.tier] = []; tiers[sk.tier].push(sk); });
+  const tierNames = { 1:'Tier I — Foundation', 2:'Tier II — Developing', 3:'Tier III — Advanced', 4:'Tier IV — Elite' };
+  Object.keys(tiers).sort().forEach((tierNum, tierIdx) => {
+    if (tierIdx > 0) { const conn = document.createElement('div'); conn.className = 'connector'; const prevTierSkills = tiers[Object.keys(tiers).sort()[tierIdx-1]]; const anyPrevDone = prevTierSkills.some(sk => getSavedTier(bKey, sk.id) >= 3); conn.innerHTML = `<div class="connector-line ${anyPrevDone ? 'lit' : ''}" style="color:${color}; ${anyPrevDone ? `background:${color}; box-shadow:0 0 8px ${color}` : ''}"></div>`; container.appendChild(conn); }
+    const section = document.createElement('div'); section.className = 'tier-section'; const label = document.createElement('div'); label.className = 'tier-label'; label.style.color = `${color}88`; label.textContent = tierNames[tierNum] || `Tier ${tierNum}`; section.appendChild(label); const row = document.createElement('div'); row.className = 'skills-row';
+    tiers[tierNum].forEach(skill => { const status = getSkillStatus(bKey, skill), tierProgress = getSavedTier(bKey, skill.id), nextTier = Math.min(tierProgress+1,3); const node = document.createElement('div'); node.className = `skill-node ${status}`; node.style.color = color; if (status !== 'locked') { node.style.borderColor = color; node.style.boxShadow = status === 'completed' ? `0 0 10px ${color}, 0 0 20px ${color}88, 0 0 40px ${color}44` : `0 0 8px ${color}66`; } node.onclick = () => openMission(bKey, skill); const statusIcon = status === 'completed' ? '✦' : status === 'locked' ? '🔒' : status === 'available' ? '◈' : '◉'; let dotsHtml=''; for(let d=1;d<=3;d++) dotsHtml += `<div class="tier-dot ${tierProgress>=d?'filled':''}" style="${tierProgress>=d ? `background:${color}; border-color:${color}` : ''}"></div>`; const missionText = getMissionText(bKey, skill); const near = isOneStepAway(bKey, skill) ? '<div class="near-badge">1 step away</div>' : ''; node.innerHTML = `<div class="skill-status-badge">${statusIcon}</div><div class="skill-name" style="color:${status !== 'locked' ? color : 'rgba(255,255,255,0.3)'}">${skill.name}</div>${skill.path ? `<div class="skill-path">${skill.path}</div>` : ''}<div class="difficulty-tag">${getDifficultyLabel(skill,nextTier)}</div>${near}<div class="skill-mission">${missionText.substring(0,70)}${missionText.length>70?'…':''}</div><div class="skill-tier-dots">${dotsHtml}</div>`; row.appendChild(node); });
+    section.appendChild(row); container.appendChild(section);
+  });
+}
+
+function openMission(bKey, skill) {
+  currentBranch = bKey; currentSkill = skill;
+  const branch = BRANCHES[bKey], color = branch.color, status = getSkillStatus(bKey, skill), tierProgress = getSavedTier(bKey, skill.id), nextTier = Math.min(tierProgress+1,3);
+  document.getElementById('modal-skill-name').textContent = skill.name; document.getElementById('modal-skill-name').style.color = color; document.getElementById('modal-skill-name').style.textShadow = `0 0 12px ${color}`;
+  const tierNames = ['', 'Tier I', 'Tier II', 'Tier III', 'Tier IV']; const pathLabel = skill.path ? ` · ${skill.path.toUpperCase()}` : ''; document.getElementById('modal-tier-label').textContent = `${tierNames[skill.tier]} · ${branch.name.toUpperCase()}${pathLabel} · ${getDifficultyLabel(skill,nextTier)}`;
+  const missionText = getMissionText(bKey, skill); const reqText = status === 'locked' ? `\n\nUNLOCK REQUIREMENTS:\n${getRequirementText(bKey, skill)}` : ''; document.getElementById('modal-mission-text').textContent = missionText + reqText;
+  let dotsHtml=''; for(let d=1;d<=3;d++){ const filled=tierProgress>=d; dotsHtml += `<div class="modal-tier-dot ${filled?'filled':''}" style="${filled ? `background:${color}; border-color:${color}; box-shadow:0 0 10px ${color},0 0 20px ${color}` : 'color:'+color}"></div>`; } dotsHtml += `<span class="modal-tier-text">${tierProgress}/3 TIERS</span>`; document.getElementById('modal-tier-progress').innerHTML = dotsHtml; document.getElementById('modal-tier-progress').style.color = color;
+  const btn = document.getElementById('modal-complete-btn');
+  if (status === 'completed') { btn.textContent='✦ MASTERED'; btn.disabled=true; btn.style.cursor='default'; btn.style.background=`linear-gradient(135deg, ${color}33, ${color}22)`; btn.style.color=color; btn.style.border=`1px solid ${color}44`; btn.style.boxShadow=`0 0 20px ${color}33`; }
+  else if (status === 'locked') { btn.textContent='🔒 LOCKED — PREVIEW ONLY'; btn.disabled=true; btn.style.cursor='default'; btn.style.background='rgba(255,255,255,0.04)'; btn.style.color='rgba(255,255,255,0.3)'; btn.style.border='1px solid rgba(255,255,255,0.08)'; btn.style.boxShadow='none'; }
+  else { btn.textContent='✓ MISSION COMPLETE'; btn.disabled=false; btn.style.cursor='pointer'; btn.style.background=`linear-gradient(135deg, ${color}, ${color}cc)`; btn.style.color='#000'; btn.style.border='none'; btn.style.boxShadow=`0 0 20px ${color}88,0 0 40px ${color}44`; }
+  const sheet = document.getElementById('modal-sheet'); sheet.classList.remove('dragging'); sheet.style.transform=''; sheet.style.opacity=''; document.getElementById('mission-modal').classList.add('active');
+}
+function closeMissionModal(e) { if (e && e.target !== document.getElementById('mission-modal')) return; const sheet = document.getElementById('modal-sheet'); sheet.classList.remove('dragging'); sheet.style.transform=''; sheet.style.opacity=''; document.getElementById('mission-modal').classList.remove('active'); currentSkill = null; }
+function updateActiveStreak(dateStr) { if (!state.streaks.active) state.streaks.active = {count:0,lastDate:''}; const streak = state.streaks.active; if (streak.lastDate === dateStr) return; if (streak.lastDate && daysBetween(streak.lastDate, dateStr) === 1) streak.count += 1; else streak.count = 1; streak.lastDate = dateStr; }
+function completeMission() {
+  if (!currentBranch || !currentSkill) return; const bKey=currentBranch, skill=currentSkill, branch=BRANCHES[bKey], current=getSavedTier(bKey,skill.id), status=getSkillStatus(bKey,skill); if (current>=3 || status==='locked') return;
+  const completedTier=current+1, mission=getMissionText(bKey,skill); setSavedTier(bKey, skill.id, completedTier); const date=todayKey(), xp=skillXPForTier(skill,completedTier); state.journal.unshift({date:new Date().toISOString(), day:date, week:weekKey(), branch:bKey, branchName:branch.name, skillId:skill.id, skillName:skill.name, skillTier:skill.tier, completedTier, mission, xp, difficulty:getDifficultyLabel(skill,completedTier)}); updateActiveStreak(date); if (state.focusQuest && state.focusQuest.branch === bKey && state.focusQuest.skillId === skill.id) state.focusQuest = null; saveState(); document.getElementById('mission-modal').classList.remove('active'); currentSkill=null; showUnlockFlash(branch.color, branch.emoji || branch.icon, skill.name, completedTier); setTimeout(()=>{ renderTree(bKey); renderOverview(); const prog=getBranchProgress(bKey); document.getElementById('bv-xp').textContent = `${getBranchXP(bKey)} XP · ${prog.completed}/${prog.total} SKILLS · ${getBranchRank(bKey)}`; },200);
+}
+
+function openJournalModal() { const list=document.getElementById('journal-list'); if(!list)return; const entries=state.journal.slice(0,80); list.innerHTML = entries.length ? entries.map(j=>`<div class="journal-card"><div class="journal-title">${j.branchName || j.branch} · ${j.skillName} · Tier ${j.completedTier}</div><div class="journal-meta">${new Date(j.date).toLocaleString()} · ${j.xp || 0} XP · ${j.difficulty || 'Medium'}</div><div class="journal-proof"><strong>Mission:</strong> ${j.mission || ''}</div></div>`).join('') : '<div class="journal-card"><div class="journal-proof">No completed missions yet.</div></div>'; document.getElementById('journal-modal').classList.add('active'); }
+
+function closeJournalModal(e) { const m=document.getElementById('journal-modal'); if(e && e.target!==m)return; m.classList.remove('active'); }
+function openWeeklyReviewModal() { const recent=getRecentJournalDays(7), byBranch={}; recent.forEach(j=>byBranch[j.branchName || j.branch]=(byBranch[j.branchName || j.branch]||0)+1); const best=Object.keys(byBranch).sort((a,b)=>byBranch[b]-byBranch[a])[0] || 'None yet'; document.getElementById('weekly-review-summary').textContent = `Last 7 days: ${recent.length} missions completed. Most improved branch: ${best}.`; document.getElementById('review-wins').value=''; document.getElementById('review-avoid').value=''; document.getElementById('review-priority').value=''; document.getElementById('weekly-review-modal').classList.add('active'); }
+function closeWeeklyReviewModal(e) { const m=document.getElementById('weekly-review-modal'); if(e && e.target!==m)return; m.classList.remove('active'); }
+function saveWeeklyReview() { state.reviews.unshift({date:new Date().toISOString(), week:weekKey(), wins:document.getElementById('review-wins').value.trim(), avoided:document.getElementById('review-avoid').value.trim(), priority:document.getElementById('review-priority').value.trim(), completed:getRecentJournalDays(7).length, focus:state.focusBranch}); saveState(); closeWeeklyReviewModal(); renderDashboard(); }
+function showUnlockFlash(color, emoji, skillName, tier) { const tierLabels=['','TIER I UNLOCKED','TIER II UNLOCKED','TIER III — MASTERED']; const flash=document.getElementById('unlock-flash'), ring=document.getElementById('flash-ring'), text=document.getElementById('flash-text'), sub=document.getElementById('flash-subtext'); ring.style.color=color; ring.style.borderColor=color; ring.style.boxShadow=`0 0 30px ${color}, 0 0 60px ${color}, inset 0 0 30px rgba(255,255,255,0.1)`; ring.textContent=emoji || '⚡'; text.textContent=tierLabels[tier] || 'MISSION COMPLETE'; text.style.textShadow=`0 0 20px ${color}`; sub.textContent=String(skillName).toUpperCase(); flash.classList.add('active'); setTimeout(()=>flash.classList.remove('active'),1800); }
+function openResetModal(){document.getElementById('reset-modal').classList.add('active');}
+function closeResetModal(e){if(e && e.target !== document.getElementById('reset-modal'))return; document.getElementById('reset-modal').classList.remove('active');}
+function confirmFullReset(){try{localStorage.removeItem('lifeTreeState');}catch(e){} state=blankState(); loadState(); saveState(); renderOverview(); if(currentBranch){renderTree(currentBranch); const prog=getBranchProgress(currentBranch); document.getElementById('bv-xp').textContent=`${getBranchXP(currentBranch)} XP · ${prog.completed}/${prog.total} SKILLS · ${getBranchRank(currentBranch)}`;} closeResetModal(); showUnlockFlash('#ef4444','⟲','ALL PROGRESS RESET',3);}
+
+function setupMissionSwipeClose(){ const sheet=document.getElementById('modal-sheet'); let sy=0,cy=0,active=false; sheet.addEventListener('touchstart',e=>{ if(!document.getElementById('mission-modal').classList.contains('active'))return; sy=e.touches[0].clientY; cy=sy; active=true; sheet.classList.add('dragging'); },{passive:true}); sheet.addEventListener('touchmove',e=>{ if(!active)return; cy=e.touches[0].clientY; const delta=Math.max(0,cy-sy); if(delta>0){sheet.style.transform=`translateY(${delta}px)`; sheet.style.opacity=String(Math.max(.45,1-delta/420));} },{passive:true}); sheet.addEventListener('touchend',()=>{ if(!active)return; const delta=Math.max(0,cy-sy); active=false; sheet.classList.remove('dragging'); if(delta>90) closeMissionModal(); else {sheet.style.transform='';sheet.style.opacity='';} }); }
+function setupBranchSwipeBack(){ const view=document.getElementById('branch-view'); let sx=0,sy=0,cx=0,cy=0,active=false,horizontal=false; view.addEventListener('touchstart',e=>{ if(!view.classList.contains('active') || document.getElementById('mission-modal').classList.contains('active') || e.touches.length!==1)return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; cx=sx; cy=sy; active=true; horizontal=false; view.classList.remove('returning-home'); },{passive:true}); view.addEventListener('touchmove',e=>{ if(!active || document.getElementById('mission-modal').classList.contains('active'))return; cx=e.touches[0].clientX; cy=e.touches[0].clientY; const dx=cx-sx, dy=cy-sy; if(!horizontal && dx>18 && Math.abs(dx)>Math.abs(dy)*1.25){horizontal=true; view.classList.add('swiping-back');} if(horizontal && dx>0){e.preventDefault(); const d=Math.min(dx,window.innerWidth||390); view.style.transform=`translateX(${d}px)`; view.style.opacity=String(Math.max(.35,1-d/520));} },{passive:false}); view.addEventListener('touchend',()=>{ if(!active)return; const dx=cx-sx, dy=cy-sy, go=horizontal && dx>90 && dx>Math.abs(dy)*1.2; active=false; horizontal=false; view.classList.remove('swiping-back'); view.classList.add('returning-home'); if(go){view.style.transform=`translateX(${window.innerWidth||390}px)`; view.style.opacity='0'; setTimeout(closeBranch,210);} else {view.style.transform=''; view.style.opacity=''; setTimeout(()=>view.classList.remove('returning-home'),230);} }); }
+function showStartupError(error){ const grid=document.getElementById('branches-grid'); if(!grid)return; grid.innerHTML=`<div style="grid-column:1/-1; background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.45); border-radius:16px; padding:16px; color:#fff; line-height:1.45;"><div style="font-family:Orbitron,monospace; color:#ef4444; margin-bottom:8px;">APP LOAD ERROR</div><div>The saved progress data on this device may be corrupted. Tap reset below, then refresh the file.</div><button onclick="localStorage.removeItem('lifeTreeState'); location.reload();" style="margin-top:12px; padding:12px 14px; border:0; border-radius:12px; background:#ef4444; color:#000; font-family:Orbitron,monospace; font-weight:700;">RESET SAVED PROGRESS</button></div>`; console.error('Life Tree startup error:',error); }
+function initLifeTree(){try{loadState(); renderOverview(); setupMissionSwipeClose(); setupBranchSwipeBack();}catch(error){showStartupError(error);}}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initLifeTree); else initLifeTree();
+
+</script>  
+</body>  
+</html>  
